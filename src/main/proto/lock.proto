@@ -1,0 +1,23 @@
+// Copyright 2021, Justen Walker
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+
+option java_package = "tech.justen.concord.goodwill.grpc";
+option java_outer_classname = "LockProto";
+option go_package = "go.justen.tech/goodwill/internal/pb";
+
+package lock;
+
+service LockService {
+  rpc ProjectLock(Lock) returns (LockResult) {}
+  rpc ProjectUnlock(Lock) returns (LockResult) {}
+}
+
+message Lock {
+  string name = 1;
+}
+
+message LockResult {
+
+}

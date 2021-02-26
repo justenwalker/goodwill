@@ -1,0 +1,44 @@
+// Copyright 2021, Justen Walker
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+
+option java_package = "tech.justen.concord.goodwill.grpc";
+option java_outer_classname = "ConfigProto";
+option go_package = "go.justen.tech/goodwill/internal/pb";
+
+package config;
+
+service ConfigService {
+  rpc GetConfiguration(ConfigurationRequest) returns (Configuration) {}
+}
+
+message ConfigurationRequest {
+
+}
+
+message Configuration {
+  string processID = 1;
+  string workingDirectory = 2;
+  ProjectInfo projectInfo = 3;
+  RepositoryInfo repositoryInfo = 4;
+  APIConfiguration apiConfiguration = 5;
+}
+
+message ProjectInfo {
+  string OrgID = 1;
+  string OrgName = 2;
+  string ProjectID = 3;
+  string ProjectName = 4;
+}
+
+message RepositoryInfo {
+  string RepoID = 1;
+  string RepoName = 2;
+  string RepoURL = 3;
+}
+
+message APIConfiguration {
+  string baseURL = 1;
+  string sessionToken = 2;
+}

@@ -1,8 +1,10 @@
-*.bin
+# Archive
+/bin/
+/dist/
+/target/
+
+# Terraform
 .terraform/
 *.lock.hcl
-*.iml
 *.tfstate
 *.tfstate.backup
-/target/
-.idea/

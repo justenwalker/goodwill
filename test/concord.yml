@@ -1,0 +1,33 @@
+# Copyright 2021, Justen Walker
+# SPDX-License-Identifier: Apache-2.0
+
+configuration:
+  arguments:
+    goodwillCfg:
+      binary: goodwill.flow.bin
+flows:
+  default:
+    - checkpoint: "start"
+    - task: goodwill
+      in:
+        flow: default
+    - checkpoint: "variables"
+    - task: goodwill
+      in:
+        flow: SetVariables
+    - checkpoint: "crypto"
+    - task: goodwill
+      in:
+        flow: Crypto
+    - checkpoint: "lock"
+    - task: goodwill
+      in:
+        flow: Lock
+    - checkpoint: "kv"
+    - task: goodwill
+      in:
+        flow: KeyValue
+    - checkpoint: "docker"
+    - task: goodwill
+      in:
+        flow: Docker

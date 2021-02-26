@@ -1,0 +1,9 @@
+/.terraform/
+/files/concord.conf
+/files/concord-server.conf
+/files/concord-agent.conf
+/files/bootstrap.ldif
+*.lock.hcl
+*.lock.info
+*.tfstate
+*.tfstate.backup

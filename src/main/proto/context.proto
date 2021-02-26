@@ -1,0 +1,84 @@
+// Copyright 2021, Justen Walker
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
+option java_package = "tech.justen.concord.goodwill.grpc";
+option java_outer_classname = "ContextProto";
+option go_package = "go.justen.tech/goodwill/internal/pb";
+
+package context;
+
+service ContextService {
+  rpc GetVariable(VariableName) returns (Value) {}
+  rpc SetVariable(Variable) returns (SetVariableResult) {}
+  rpc GetVariableNames(GetVariableNameParams) returns (VariableNameList) {}
+  rpc GetVariables(GetVariablesRequest) returns (MapValue) {}
+  rpc Evaluate(EvaluateRequest) returns (Value) {}
+}
+
+message GetVariablesRequest {}
+message SetVariableResult {}
+message GetVariableNameParams {}
+
+message Value {
+  google.protobuf.Any value = 1;
+}
+
+message MapValue {
+  map<string, Value> value = 1;
+}
+
+message ListValue {
+  repeated Value value = 1;
+}
+
+message StringValue {
+  string value = 1;
+}
+
+message IntValue {
+  int64 value = 1;
+}
+
+message DoubleValue {
+  double value = 1;
+}
+
+message BoolValue {
+  bool value = 1;
+}
+
+message TimeValue {
+  int64 value = 1;
+}
+
+message NullValue {
+
+}
+
+message JSONValue {
+  string class = 1;
+  bytes json = 2;
+}
+
+message EvaluateRequest {
+  string expression = 1;
+  string type = 2;
+  repeated Variable parameters = 3;
+}
+
+message VariableName {
+  string name = 1;
+}
+
+message VariableNameList  {
+  repeated string name = 1;
+}
+
+message Variable {
+  string name = 1;
+  Value value = 2;
+}

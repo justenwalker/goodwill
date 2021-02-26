@@ -1,0 +1,40 @@
+// Copyright 2021, Justen Walker
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+
+option java_package = "tech.justen.concord.goodwill.grpc";
+option java_outer_classname = "DockerProto";
+option go_package = "go.justen.tech/goodwill/internal/pb";
+
+package docker;
+
+service DockerService {
+  rpc RunContainer(DockerContainerSpec) returns (stream DockerContainerResult) {}
+}
+
+message DockerContainerResult {
+  oneof result {
+    uint32 status = 1;
+    string stdout = 2;
+    string stderr = 3;
+  }
+}
+
+message DockerContainerSpec {
+  string image = 1;
+  string name = 2;
+  string user = 3;
+  string workDir = 4;
+  string entryPoint = 5;
+  repeated string command = 6;
+  string cpu = 7;
+  string memory = 8;
+  map<string, string> env = 9;
+  string envFile = 10;
+  map<string, string> labels = 11;
+  bool forcePull = 12;
+  repeated string hosts = 13;
+  string stdoutFilePath = 14;
+  bool redirectStdError = 15;
+}
