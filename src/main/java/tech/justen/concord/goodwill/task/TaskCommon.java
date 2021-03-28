@@ -99,7 +99,7 @@ public class TaskCommon {
         DockerContainer container = new DockerContainer();
         container.entryPoint = goodwillContainerBinPath.toString();
         container.command = Arrays.asList("-debug", "-dir", "/workspace", "-out", out.toString());
-        container.image = "golang:1.16";
+        container.image = params.getGoDockerImage();
         container.env = env;
         container.workDir = "/workspace";
         container.debug = true;
