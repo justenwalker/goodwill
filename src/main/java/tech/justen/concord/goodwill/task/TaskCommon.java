@@ -219,7 +219,9 @@ public class TaskCommon {
             env.put("CONCORD_ORG_NAME", config.orgName());
             env.put("CONCORD_PROCESS_ID", config.processId());
             env.put("CONCORD_WORKING_DIRECTORY", config.workingDirectory().toString());
+            log.info("======== BEGIN GOODWILL TASK: {} ========", taskName);
             exec(env, goodwillBin.getAbsolutePath(), taskName);
+            log.info("======== END GOODWILL TASK: {} ========", taskName);
         } finally {
             if (server != null) {
                 server.shutdown();
@@ -251,7 +253,7 @@ public class TaskCommon {
             try (BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                 String line;
                 while ((line = stdout.readLine()) != null) {
-                    processLog.info("[OUT] GOODWILL: {}", line);
+                    processLog.info("[INFO ] GOODWILL: {}", line);
                 }
             } catch (IOException e) {
                 log.error("error reading stdout", e);
@@ -261,7 +263,7 @@ public class TaskCommon {
             try (BufferedReader stderr = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
                 String line;
                 while ((line = stderr.readLine()) != null) {
-                    processLog.info("[ERR] GOODWILL: {}", line);
+                    processLog.info("[WARN ] GOODWILL: {}", line);
                 }
             } catch (IOException e) {
                 log.error("error reading stderr", e);
