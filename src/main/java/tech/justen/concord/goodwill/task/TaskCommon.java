@@ -221,6 +221,7 @@ public class TaskCommon {
             env.put("CONCORD_ORG_NAME", config.orgName());
             env.put("CONCORD_PROCESS_ID", config.processId());
             env.put("CONCORD_WORKING_DIRECTORY", config.workingDirectory().toString());
+            params.setGoEnvironment(env);
             log.info("======== BEGIN GOODWILL TASK: {} ========", taskName);
             exec(env, goodwillBin.getAbsolutePath(), taskName);
             log.info("======== END GOODWILL TASK: {} ========", taskName);
