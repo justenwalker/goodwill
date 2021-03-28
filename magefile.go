@@ -34,6 +34,7 @@ var (
 	version    string
 	goBinaries []artifact
 	jar        artifact
+	localBin   string
 	sumFile    string
 	lock       sync.Mutex
 )
@@ -66,12 +67,12 @@ func Clean() error {
 
 // Build the Go binary only
 func BuildGo() error {
-	path := filepath.Join(".", "bin", "goodwill")
+	localBin = filepath.Join(".", "bin", "goodwill")
 	if runtime.GOOS == "windows" {
-		path += ".exe"
+		localBin += ".exe"
 	}
-	debug.Println("==> build go binary:", path)
-	return sh.RunV(mg.GoCmd(), "build", "-o", path)
+	debug.Println("==> build go binary:", localBin)
+	return sh.RunV(mg.GoCmd(), "build", "-o", localBin)
 }
 
 // Build the task JAR
@@ -266,8 +267,37 @@ func vendorTestFlow() error {
 	return cmd.Run()
 }
 
+func precompileTestFlow() error {
+	mg.Deps(BuildGo)
+	return sh.RunV(localBin, "-debug", "-os", "linux", "-arch", "amd64", "-dir", filepath.Join(testDir, "flow"), "-out", filepath.Join(testDir, "flow", "goodwill.tasks"))
+}
+
 func E2E() error {
-	mg.Deps(Package, E2EUp, vendorTestFlow)
+	mg.Deps(Package, E2EUp)
+	mg.SerialDeps(vendorTestFlow, precompileTestFlow)
+	runE2ETest("compiled", []payloadFile{
+		{filepath.Join(testDir, "concord.yml"), "concord.yml"},
+		{jar.Filename, "lib/goodwill.jar"},
+		{filepath.Join(testDir, "flow", "goodwill.go"), "goodwill.go"},
+		{filepath.Join(testDir, "flow", "go.mod"), "go.mod"},
+		{filepath.Join(testDir, "flow", "go.sum"), "go.sum"},
+		{filepath.Join(testDir, "flow", "vendor"), "vendor"},
+	})
+	runE2ETest("precompiled", []payloadFile{
+		{filepath.Join(testDir, "concord.yml"), "concord.yml"},
+		{jar.Filename, "lib/goodwill.jar"},
+		{filepath.Join(testDir, "flow", "goodwill.tasks"), "goodwill.tasks"},
+	})
+	return nil
+}
+
+type payloadFile struct {
+	From string
+	To   string
+}
+
+func runE2ETest(name string, files []payloadFile, ) error {
+	debug.Println("===> run e2e test", name)
 	var buf bytes.Buffer
 	mpw := multipart.NewWriter(&buf)
 	mpw.WriteField("org", orgName)
@@ -277,25 +307,15 @@ func E2E() error {
 		return err
 	}
 	zw := zip.NewWriter(payload)
-	for _, file := range []struct {
-		from string
-		to   string
-	}{
-		{filepath.Join(testDir, "concord.yml"), "concord.yml"},
-		{jar.Filename, "lib/goodwill.jar"},
-		{filepath.Join(testDir, "flow", "goodwill.go"), "goodwill.go"},
-		{filepath.Join(testDir, "flow", "go.mod"), "go.mod"},
-		{filepath.Join(testDir, "flow", "go.sum"), "go.sum"},
-		{filepath.Join(testDir, "flow", "vendor"), "vendor"},
-	} {
-		stat, err := os.Stat(file.from)
+	for _, file := range files {
+		stat, err := os.Stat(file.From)
 		if err != nil {
 			return err
 		}
 		if stat.IsDir() {
-			err = addZipDir(zw, file.from, file.to)
+			err = addZipDir(zw, file.From, file.To)
 		} else {
-			err = addZipFile(zw, file.from, file.to)
+			err = addZipFile(zw, file.From, file.To)
 		}
 		if err != nil {
 			return err
