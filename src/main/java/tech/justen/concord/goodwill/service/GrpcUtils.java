@@ -3,9 +3,10 @@
 
 package tech.justen.concord.goodwill.service;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -17,16 +18,18 @@ import tech.justen.concord.goodwill.grpc.ContextProto.*;
 
 import java.util.*;
 
+@SuppressWarnings("unchecked")
 public class GrpcUtils {
 
     private interface Handler {
         Any getAny(Object val);
     }
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = JsonMapper.builder()
+            .configure(JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS, true)
+            .build();
 
-    @SuppressWarnings("rawtypes")
-    private static final Map<Class, Handler> valueMapper = new HashMap<>();
+    private static final Map<Class<?>, Handler> valueMapper = new HashMap<>();
 
     static {
         valueMapper.put(String.class, (Object obj) -> getAny((String) obj));
@@ -38,10 +41,9 @@ public class GrpcUtils {
         valueMapper.put(Integer.class, (Object obj) -> getAny((Integer) obj));
         valueMapper.put(Long.class, (Object obj) -> getAny((Long) obj));
         valueMapper.put(Date.class, (Object obj) -> getAny((Date) obj));
-        valueMapper.put(Map.class, (Object obj) -> getAny((Map) obj));
-        valueMapper.put(List.class, (Object obj) -> getAny((List) obj));
+        valueMapper.put(Map.class, (Object obj) -> getAny((Map<String, Object>) obj));
+        valueMapper.put(List.class, (Object obj) -> getAny((List<Object>) obj));
         valueMapper.put(UUID.class, (Object obj) -> getAny(((UUID) obj).toString()));
-        objectMapper.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
     }
 
     public static Object fromValue(Value val) throws InvalidProtocolBufferException {
@@ -95,7 +97,7 @@ public class GrpcUtils {
             return Value.newBuilder().setValue(any(NullValue.newBuilder().build())).build();
         }
         Class<?> objClass = obj.getClass();
-        for (Map.Entry<Class, Handler> ent : valueMapper.entrySet()) {
+        for (Map.Entry<Class<?>, Handler> ent : valueMapper.entrySet()) {
             Class<?> c = ent.getKey();
             if (c.isAssignableFrom(objClass)) {
                 Handler h = ent.getValue();
@@ -176,8 +178,10 @@ public class GrpcUtils {
         switch (ex.getCode()) {
             case 400:
                 status = Status.INVALID_ARGUMENT;
+                break;
             case 404:
                 status = Status.NOT_FOUND;
+                break;
         }
         if (!ex.getResponseBody().isEmpty()) {
             if (ex.getResponseBody().contains("already exists")) {
