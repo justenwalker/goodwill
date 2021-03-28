@@ -26,7 +26,7 @@ type flags struct {
 func (f *flags) Parse() bool {
 	fs := flag.NewFlagSet("", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
-	fs.StringVar(&f.Output, "out", "goodwill.out", "the output binary")
+	fs.StringVar(&f.Output, "out", "goodwill.tasks", "the output binary")
 	fs.StringVar(&f.Dir, "dir", ".", "the directory containing the goodwill source")
 	fs.StringVar(&f.OS, "os", runtime.GOOS, "set the GOOS")
 	fs.StringVar(&f.Arch, "arch", runtime.GOARCH, "set the GOARCH")

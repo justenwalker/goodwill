@@ -21,7 +21,7 @@ public class TaskParams {
 
     public static final String BINARY_KEY = "binary";
 
-    public static final String DIRECTORY_KEY = "dir";
+    public static final String BUILD_DIR_KEY = "buildDir";
 
     public static final String DEBUG_KEY = "debug";
 
@@ -47,9 +47,11 @@ public class TaskParams {
 
     private static final String DEFAULT_GO_ARCH = "amd64";
 
-    private static final String DEFAULT_GOODWILL_DIR = ".goodwill";
+    private static final String DEFAULT_BUILD_DIR = ".goodwill";
 
-    private static final String DEFAULT_BIN = "goodwill.flow";
+    private static final String DEFAULT_BIN = "goodwill.tasks";
+
+    private static final String DEFAULT_BIN_EXE = "goodwill.tasks.exe";
 
     private static final String DEFAULT_TASK = "Default";
 
@@ -73,9 +75,9 @@ public class TaskParams {
 
     public String taskName;
 
-    public String flowBinary;
+    public String tasksBinary;
 
-    public String flowDirectory;
+    public String buildDir;
 
     public boolean useDockerImage;
 
@@ -122,18 +124,21 @@ public class TaskParams {
         return taskName;
     }
 
-    public String getFlowBinary() {
-        if (flowBinary == null || flowBinary.isEmpty()) {
+    public String getTasksBinary() {
+        if (tasksBinary == null || tasksBinary.isEmpty()) {
+            if (getGoOS() == "windows") {
+                return DEFAULT_BIN_EXE;
+            }
             return DEFAULT_BIN;
         }
-        return flowBinary;
+        return tasksBinary;
     }
 
-    public String getDirectory() {
-        if (flowDirectory == null || flowDirectory.isEmpty()) {
-            return DEFAULT_GOODWILL_DIR;
+    public String getBuildDirectory() {
+        if (buildDir == null || buildDir.isEmpty()) {
+            return DEFAULT_BUILD_DIR;
         }
-        return flowDirectory;
+        return buildDir;
     }
 
     public Path getBinaryOutPath(Path workingDirectory) {
@@ -141,7 +146,7 @@ public class TaskParams {
         if (getGoOS().equals("windows")) {
             ext = ".exe";
         }
-        return Paths.get(workingDirectory.toString(), getDirectory(), String.format("goodwill%s", ext));
+        return Paths.get(workingDirectory.toString(), getBuildDirectory(), String.format("goodwill%s", ext));
     }
 
     public String getBinaryClasspath() {

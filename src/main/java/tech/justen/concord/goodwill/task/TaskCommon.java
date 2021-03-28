@@ -81,8 +81,8 @@ public class TaskCommon {
 
     public String compileInDocker() throws java.lang.Exception {
         log.info("Compiling goodwill binary in Docker");
-        Path goodwillContainerBinPath = Paths.get("/workspace", params.getDirectory(), "goodwill");
-        Path goodwillBinPath = Paths.get(config.workingDirectory().toString(), params.getDirectory(), "goodwill");
+        Path goodwillContainerBinPath = Paths.get("/workspace", params.getBuildDirectory(), "goodwill");
+        Path goodwillBinPath = Paths.get(config.workingDirectory().toString(), params.getBuildDirectory(), "goodwill");
         File goodwillBin = goodwillBinPath.toFile();
         if (!goodwillBin.exists()) {
             String binClasspath = String.format("/go/%s/%s/goodwill%s", "linux", "amd64", "");
@@ -95,7 +95,7 @@ public class TaskCommon {
         }
         Map<String, String> env = new HashMap<>();
         env.put("GOROOT", "/usr/local/go");
-        Path out = Paths.get("/workspace", params.getFlowBinary());
+        Path out = Paths.get("/workspace", params.getTasksBinary());
         DockerContainer container = new DockerContainer();
         container.entryPoint = goodwillContainerBinPath.toString();
         container.command = Arrays.asList("-debug", "-dir", "/workspace", "-out", out.toString());
@@ -111,7 +111,7 @@ public class TaskCommon {
         if (result != 0) {
             throw new RuntimeException("goodwill exited unsuccessfully. See output logs for details.");
         }
-        return Paths.get(config.workingDirectory().toString(), params.getFlowBinary()).toString();
+        return Paths.get(config.workingDirectory().toString(), params.getTasksBinary()).toString();
     }
 
     public String compileOnHost() throws java.lang.Exception {
@@ -130,7 +130,7 @@ public class TaskCommon {
                 throw new RuntimeException("Cannot make set executable bit");
             }
         }
-        File out = new File(config.workingDirectory().toString(), params.getFlowBinary());
+        File out = new File(config.workingDirectory().toString(), params.getTasksBinary());
         Map<String, String> env = new HashMap<>();
         if (params.installGo) {
             Path goRoot = installGo();
@@ -157,9 +157,9 @@ public class TaskCommon {
 
     public void execute() throws java.lang.Exception {
         Path workDir = config.workingDirectory();
-        File goodwillDir = new File(workDir.toString(), params.getDirectory());
+        File goodwillDir = new File(workDir.toString(), params.getBuildDirectory());
         goodwillDir.mkdir();
-        File goodwillBin = new File(workDir.toString(), params.getFlowBinary());
+        File goodwillBin = new File(workDir.toString(), params.getTasksBinary());
         String commandPath = goodwillBin.toString();
         if (!goodwillBin.exists()) {
             log.debug("Goodwill binary {} does not exist", goodwillBin.toString());
@@ -285,15 +285,15 @@ public class TaskCommon {
     private Path installGo() throws IOException {
         String version = params.getGoVersion();
         Path workDir = config.workingDirectory();
-        Path goRootDir = Paths.get(workDir.toString(), params.getDirectory(), "go");
-        File goInstall = Paths.get(workDir.toString(), params.getDirectory(), "go", "bin", "go").toFile();
+        Path goRootDir = Paths.get(workDir.toString(), params.getBuildDirectory(), "go");
+        File goInstall = Paths.get(workDir.toString(), params.getBuildDirectory(), "go", "bin", "go").toFile();
         if (goInstall.canExecute()) {
             log.info("Go already installed at {}", goInstall.toString());
             return goRootDir;
         }
         log.info("Installing Go {}", version);
         Path tar = dependencyManager.resolve(URI.create(params.getGoDownloadURL(version)));
-        TarUtils.extractTarball(tar, Paths.get(workDir.toString(), params.getDirectory()));
+        TarUtils.extractTarball(tar, Paths.get(workDir.toString(), params.getBuildDirectory()));
         log.info("Go installed at {}", goInstall.toString());
         return goRootDir;
     }

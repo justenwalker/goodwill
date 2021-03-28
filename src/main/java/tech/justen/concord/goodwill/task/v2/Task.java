@@ -83,8 +83,8 @@ public class Task implements com.walmartlabs.concord.runtime.v2.sdk.Task {
         params.installGo = defaultBool(input, INSTALL_GO_KEY, false);
         params.useDockerImage = defaultBool(input, USE_DOCKER_IMAGE_KEY, true);
         params.debug = defaultBool(input, DEBUG_KEY, false);
-        params.flowBinary = defaultString(input, BINARY_KEY);
-        params.flowDirectory = defaultString(input, DIRECTORY_KEY);
+        params.tasksBinary = defaultString(input, BINARY_KEY);
+        params.buildDir = defaultString(input, BUILD_DIR_KEY);
         params.taskName = defaultString(input, TASK_NAME_KEY);
         params.goProxy = defaultString(input, GOPROXY_KEY);
         params.goNoProxy = defaultString(input, GONOPROXY_KEY);
