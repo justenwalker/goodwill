@@ -87,7 +87,7 @@ func compileGoFiles(files []string, flg flags, out string) error {
 	args = append(args, "-tags=goodwill", "-o", out)
 	args = append(args, files...)
 	cmd := exec.Command(flg.GoCmd, args...)
-	debug.Println("running", cmd, strings.Join(cmd.Args, " "))
+	debug.Println("running", cmd.Path, strings.Join(cmd.Args[1:], " "))
 	debug.Printf("GOOS=%s, GOARCH=%s", flg.OS, flg.Arch)
 	cmd.Env = GoEnv(flg.OS, flg.Arch)
 	cmd.Dir = flg.Dir
