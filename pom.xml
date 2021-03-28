@@ -11,7 +11,7 @@
 
     <groupId>tech.justen.concord</groupId>
     <artifactId>goodwill</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
 
     <properties>
         <concord.version>1.82.0</concord.version>
