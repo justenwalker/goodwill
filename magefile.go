@@ -22,6 +22,7 @@ import (
 	"mime"
 	"mime/multipart"
 	"net/http"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -257,8 +258,16 @@ func E2EDown() error {
 	return sh.RunV("terraform", "-chdir="+terraformDir, "destroy", "-auto-approve")
 }
 
+func vendorTestFlow() error {
+	cmd := exec.Command("go", "mod", "vendor")
+	cmd.Dir = filepath.Join(testDir, "flow")
+	cmd.Stdout = ioutil.Discard
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
 func E2E() error {
-	mg.Deps(Package, E2EUp)
+	mg.Deps(Package, E2EUp, vendorTestFlow)
 	var buf bytes.Buffer
 	mpw := multipart.NewWriter(&buf)
 	mpw.WriteField("org", orgName)
@@ -275,10 +284,9 @@ func E2E() error {
 		{filepath.Join(testDir, "concord.yml"), "concord.yml"},
 		{jar.Filename, "lib/goodwill.jar"},
 		{filepath.Join(testDir, "flow", "goodwill.go"), "goodwill.go"},
-		{filepath.Join(curDir, "go.mod"), "go.mod"},
-		{filepath.Join(curDir, "go.sum"), "go.sum"},
-		{filepath.Join(curDir, "gw"), "gw"},
-		{filepath.Join(curDir, "internal"), "internal"},
+		{filepath.Join(testDir, "flow", "go.mod"), "go.mod"},
+		{filepath.Join(testDir, "flow", "go.sum"), "go.sum"},
+		{filepath.Join(testDir, "flow", "vendor"), "vendor"},
 	} {
 		stat, err := os.Stat(file.from)
 		if err != nil {
@@ -333,17 +341,12 @@ func addZipDir(zw *zip.Writer, dir string, dest string) error {
 		if info.IsDir() {
 			return nil
 		}
-
-		if strings.HasSuffix(info.Name(), ".go") ||
-			info.Name() == "go.mod" || info.Name() == "go.sum" {
-			return addZipFile(zw, filename, path.Join(dest, strings.TrimPrefix(filename, dir)))
-		}
-		return nil
+		return addZipFile(zw, filename, path.Join(dest, strings.TrimPrefix(filename, dir)))
 	})
 }
 
 func addZipFile(zw *zip.Writer, filename string, dest string) error {
-	debug.Printf("> payload: %s <- %s", dest, filename)
+	//debug.Printf("> payload: %s <- %s", dest, filename)
 	w, err := zw.Create(dest)
 	if err != nil {
 		return err

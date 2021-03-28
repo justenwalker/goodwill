@@ -1,7 +1,7 @@
 module flow
 
-go 1.15
-
-require go.justen.tech/goodwill v0.0.0
+go 1.16
 
 replace go.justen.tech/goodwill => ../../
+
+require go.justen.tech/goodwill v0.0.1
