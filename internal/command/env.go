@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-var debug = log.New(ioutil.Discard, "DEBUG: ", log.Ltime|log.Lmicroseconds)
+var debug = log.New(ioutil.Discard, "", 0)
 
 // SetDebug sets the debug logger
 func SetDebug(l *log.Logger) {

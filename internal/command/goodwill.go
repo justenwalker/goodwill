@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"go.justen.tech/goodwill/internal/parse"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -18,7 +19,7 @@ func Run() int {
 		return 128
 	}
 	if flg.Debug {
-		SetDebug(debug)
+		SetDebug(log.New(os.Stderr, "[DEBUG] ", 0))
 	}
 	data, err := parsePackage(flg)
 	if err != nil {
@@ -36,7 +37,7 @@ func Run() int {
 func parsePackage(flg flags) (*TemplateData, error) {
 	files, err := getGoFiles(flg.Dir, flg)
 	if err != nil {
-		return nil, fmt.Errorf("could not get go files to compile: %w", err)
+		return nil, fmt.Errorf("could not get go files to inspect: %w", err)
 	}
 	info, err := parse.Package(flg.Dir, files)
 	if err != nil {
