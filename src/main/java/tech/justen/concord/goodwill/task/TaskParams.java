@@ -49,8 +49,6 @@ public class TaskParams {
 
     private static final String DEFAULT_GOODWILL_DIR = ".goodwill";
 
-    private static final String DEFAULT_GO_DOCKER_IMAGE = "golang:1.16";
-
     private static final String DEFAULT_BIN = "goodwill.flow";
 
     private static final String DEFAULT_TASK = "Default";
@@ -190,7 +188,7 @@ public class TaskParams {
 
     public String getGoDockerImage() {
         if (goDockerImage == null || goDockerImage.isEmpty()) {
-            return DEFAULT_GO_DOCKER_IMAGE;
+            return String.format("golang:%s-alpine", getGoVersion());
         }
         return goDockerImage;
     }
