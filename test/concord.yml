@@ -4,30 +4,31 @@
 configuration:
   arguments:
     goodwillCfg:
-      binary: goodwill.flow.bin
+      useDocker: true
+      goVersion: 1.16.1
 flows:
   default:
     - checkpoint: "start"
     - task: goodwill
       in:
-        flow: default
+        task: default
     - checkpoint: "variables"
     - task: goodwill
       in:
-        flow: SetVariables
+        task: SetVariables
     - checkpoint: "crypto"
     - task: goodwill
       in:
-        flow: Crypto
+        task: Crypto
     - checkpoint: "lock"
     - task: goodwill
       in:
-        flow: Lock
+        task: Lock
     - checkpoint: "kv"
     - task: goodwill
       in:
-        flow: KeyValue
+        task: KeyValue
     - checkpoint: "docker"
     - task: goodwill
       in:
-        flow: Docker
+        task: Docker
