@@ -85,7 +85,7 @@ public class TaskCommon {
         Path goodwillBinPath = Paths.get(config.workingDirectory().toString(), params.getBuildDirectory(), "goodwill");
         File goodwillBin = goodwillBinPath.toFile();
         if (!goodwillBin.exists()) {
-            String binClasspath = String.format("/go/%s/%s/goodwill%s", "linux", "amd64", "");
+            String binClasspath = params.getBinaryClasspath();
             try (InputStream link = (getClass().getResourceAsStream(binClasspath))) {
                 Files.copy(link, goodwillBin.getAbsoluteFile().toPath());
             }
