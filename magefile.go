@@ -66,7 +66,7 @@ func Clean() error {
 }
 
 // Build the Go binary only
-func BuildGo() error {
+func Build() error {
 	localBin = filepath.Join(".", "bin", "goodwill")
 	if runtime.GOOS == "windows" {
 		localBin += ".exe"
@@ -268,7 +268,7 @@ func vendorTestFlow() error {
 }
 
 func precompileTestFlow() error {
-	mg.Deps(BuildGo)
+	mg.Deps(Build)
 	return sh.RunV(localBin, "-debug", "-os", "linux", "-arch", "amd64", "-dir", filepath.Join(testDir, "flow"), "-out", filepath.Join(testDir, "flow", "goodwill.tasks"))
 }
 
