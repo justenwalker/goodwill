@@ -193,7 +193,7 @@ public class TaskParams {
 
     public String getGoDockerImage() {
         if (goDockerImage == null || goDockerImage.isEmpty()) {
-            return String.format("golang:%s-alpine", getGoVersion());
+            return String.format("golang:%s", getGoVersion());
         }
         return goDockerImage;
     }

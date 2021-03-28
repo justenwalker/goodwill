@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 
 import static java.lang.String.format;
+import static tech.justen.concord.goodwill.DockerContainer.DEFAULT_WORK_DIR;
 
 public class TaskCommon {
 
@@ -81,7 +82,7 @@ public class TaskCommon {
 
     public String compileInDocker() throws java.lang.Exception {
         log.info("Compiling goodwill binary in Docker");
-        Path goodwillContainerBinPath = Paths.get("/workspace", params.getBuildDirectory(), "goodwill");
+        Path goodwillContainerBinPath = Paths.get(DEFAULT_WORK_DIR, params.getBuildDirectory(), "goodwill");
         Path goodwillBinPath = Paths.get(config.workingDirectory().toString(), params.getBuildDirectory(), "goodwill");
         File goodwillBin = goodwillBinPath.toFile();
         if (!goodwillBin.exists()) {
@@ -95,18 +96,32 @@ public class TaskCommon {
         }
         Map<String, String> env = new HashMap<>();
         env.put("GOROOT", "/usr/local/go");
-        Path out = Paths.get("/workspace", params.getTasksBinary());
+        params.setGoEnvironment(env);
+        Path out = Paths.get(DEFAULT_WORK_DIR, params.getTasksBinary());
         DockerContainer container = new DockerContainer();
         container.entryPoint = goodwillContainerBinPath.toString();
-        container.command = Arrays.asList("-debug", "-dir", "/workspace", "-out", out.toString());
+        List<String> cmd = new ArrayList<>();
+        cmd.add(goodwillBin.toString());
+        cmd.add("-os");
+        cmd.add(params.getGoOS());
+        cmd.add("-arch");
+        cmd.add(params.getGoArch());
+        if (params.debug) {
+            cmd.add("-debug");
+        }
+        cmd.add("-dir");
+        cmd.add(DEFAULT_WORK_DIR);
+        cmd.add("-out");
+        cmd.add(out.toString());
+        container.command = cmd;
         container.image = params.getGoDockerImage();
         container.env = env;
-        container.workDir = "/workspace";
-        container.debug = true;
+        container.workDir = DEFAULT_WORK_DIR;
+        container.debug = params.debug;
         int result = dockerService.start(container, line -> {
-            processLog.info("COMPILE: {}", line);
+            processLog.info("DOCKER: {}", line);
         }, line -> {
-            processLog.info("COMPILE: {}", line);
+            processLog.info("DOCKER: {}", line);
         });
         if (result != 0) {
             throw new RuntimeException("goodwill exited unsuccessfully. See output logs for details.");
@@ -160,17 +175,21 @@ public class TaskCommon {
         File goodwillDir = new File(workDir.toString(), params.getBuildDirectory());
         goodwillDir.mkdir();
         File goodwillBin = new File(workDir.toString(), params.getTasksBinary());
-        String commandPath = goodwillBin.toString();
         if (!goodwillBin.exists()) {
+            String commandPath;
             log.debug("Goodwill binary {} does not exist", goodwillBin.toString());
             if (params.useDockerImage) {
                 commandPath = compileInDocker();
             } else {
                 commandPath = compileOnHost();
             }
+            goodwillBin = new File(commandPath);
+            if (!goodwillBin.exists()) {
+                log.error("Goodwill binary {} does not exist", goodwillBin.toString());
+                throw new RuntimeException("Goodwill binary did not exist after compilation");
+            }
         }
         String taskName = params.getTask();
-        goodwillBin = new File(commandPath);
         boolean v = goodwillBin.setExecutable(true);
         Server server = null;
         CertUtils.CA ca = CertUtils.generateCA();
@@ -223,8 +242,15 @@ public class TaskCommon {
             env.put("CONCORD_WORKING_DIRECTORY", config.workingDirectory().toString());
             params.setGoEnvironment(env);
             log.info("======== BEGIN GOODWILL TASK: {} ========", taskName);
-            exec(env, goodwillBin.getAbsolutePath(), taskName);
+            exec(env, goodwillBin.toString(), taskName);
             log.info("======== END GOODWILL TASK: {} ========", taskName);
+        } catch (IOException e) {
+            if (e.getMessage().contains("Cannot run program") && goodwillBin.exists()) {
+                log.error("Could not run goodwill tasks binary. "
+                        + "This could mean the binary was compiled for a different architecture "
+                        + "or linked against a different libc than the platform supports.");
+            }
+            throw e;
         } finally {
             if (server != null) {
                 server.shutdown();
