@@ -23,6 +23,8 @@ public class TaskParams {
 
     public static final String DIRECTORY_KEY = "dir";
 
+    public static final String DEBUG_KEY = "debug";
+
     public static final String USE_DOCKER_IMAGE_KEY = "useDocker";
 
     public static final String INSTALL_GO_KEY = "installGo";
@@ -80,6 +82,8 @@ public class TaskParams {
     public boolean useDockerImage;
 
     public boolean installGo;
+
+    public boolean debug;
 
     public String goVersion;
 

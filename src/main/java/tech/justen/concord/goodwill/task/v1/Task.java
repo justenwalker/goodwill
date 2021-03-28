@@ -95,6 +95,7 @@ public class Task implements com.walmartlabs.concord.sdk.Task {
         params.goVersion = defaultString(ctx, GO_VERSION_KEY);
         params.installGo = defaultBool(ctx, INSTALL_GO_KEY, true);
         params.useDockerImage = defaultBool(ctx, USE_DOCKER_IMAGE_KEY, false);
+        params.debug = defaultBool(ctx, DEBUG_KEY, false);
         params.flowBinary = defaultString(ctx, BINARY_KEY);
         params.flowDirectory = defaultString(ctx, DIRECTORY_KEY);
         params.taskName = defaultString(ctx, TASK_NAME_KEY);

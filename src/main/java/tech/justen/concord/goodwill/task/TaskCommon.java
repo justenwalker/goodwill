@@ -144,7 +144,9 @@ public class TaskCommon {
         cmd.add(os);
         cmd.add("-arch");
         cmd.add(arch);
-        cmd.add("-debug");
+        if (params.debug) {
+            cmd.add("-debug");
+        }
         cmd.add("-dir");
         cmd.add(config.workingDirectory().toString());
         cmd.add("-out");
