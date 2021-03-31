@@ -50,7 +50,7 @@ func Run(fn func(ts *Task) error) error {
 	if err != nil {
 		return fmt.Errorf("fail to configure TLS: %w", err)
 	}
-	c, err := NewTask(addr, Runtime{
+	c, err := newTask(addr, runtime{
 		OrgName:    orgName,
 		WorkingDir: os.Getenv(EnvWorkingDir),
 		ProcessID:  os.Getenv(EnvProcessID),

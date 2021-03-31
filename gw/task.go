@@ -18,28 +18,32 @@ import (
 	"google.golang.org/grpc"
 )
 
-// NewTask creates a new Task connection between the client and the GRPC service on the agent
-func NewTask(addr string, rt Runtime, opts ...grpc.DialOption) (*Task, error) {
+// newTask creates a new Task connection between the client and the GRPC service on the agent
+func newTask(addr string, rt runtime, opts ...grpc.DialOption) (*Task, error) {
 	conn, err := grpc.Dial(addr, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to grpc server %q: %w", addr, err)
 	}
 	return &Task{
-		Runtime: rt,
-		conn:    conn,
+		OrgName:    rt.OrgName,
+		WorkingDir: rt.WorkingDir,
+		ProcessID:  rt.ProcessID,
+		conn:       conn,
 	}, nil
 }
 
-// Runtime contains the process runtime information given by the goodwill plugin
-type Runtime struct {
+// runtime contains the process runtime information
+type runtime struct {
 	OrgName    string
 	WorkingDir string
 	ProcessID  string
 }
 
 type Task struct {
-	Runtime
-	conn *grpc.ClientConn
+	OrgName    string
+	WorkingDir string
+	ProcessID  string
+	conn       *grpc.ClientConn
 }
 
 const (
