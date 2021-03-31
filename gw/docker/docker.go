@@ -10,25 +10,45 @@ const WorkspaceDir = "/workspace"
 
 // Options are the container run options
 type Options struct {
-	Image            string
-	Name             string
-	User             string
-	WorkDir          string
-	EntryPoint       string
-	Command          []string
-	Cpu              string
-	Memory           string
-	Env              map[string]string
-	EnvFile          string
-	Labels           map[string]string
-	ForcePull        bool
-	Hosts            []string
-	StdoutFilePath   string
+	// Image is the docker image reference for the container. (Required)
+	Image string
+	// Name sets the name of the container
+	Name string
+	// User sets a different user to run unside the container
+	User string
+	// WorkDir specifies an alternate starting directory
+	WorkDir string
+	// EntryPoint changes the command that is the entrypoint of the docker image
+	EntryPoint string
+	// Command is the list of command arguments to pass to the container
+	Command []string
+	// Cpu is the amount of cpu to limit the container
+	Cpu string
+	// Memory is the amount of memory to limit the container
+	Memory string
+	// Env contains additional environment variables to set
+	Env map[string]string
+	// EnvFile loads the given file with the list of environment variables and values
+	EnvFile string
+	// Labels contains a list of labels to apply to the container
+	Labels map[string]string
+	// ForcePull forces a docker pull before running the container, useful if the tag was updated
+	ForcePull bool
+	// Hosts is a list of additional hosts that the container can resolve, like from /etc/hosts
+	// Hosts are given `name:ip` strings like 'foo:10.0.0.3'
+	Hosts []string
+	// StdoutFilePath directs all standard error to a file
+	StdoutFilePath string
+	// RedirectStdError redirects all standard err output into standard out
 	RedirectStdError bool
-	Stdout           io.Writer
-	Stderr           io.Writer
-	StdoutCallback   func(string)
-	StderrCallback   func(string)
+	// Stdout directs all standard out to the given writer
+	Stdout io.Writer
+	// Stderr directs all standard err to the given writer
+	Stderr io.Writer
+	// StdoutCallback is an optional function that is called with every output line of the container's standard out
+	StdoutCallback func(string)
+	// StderrCallback is an optional function that is called with every output line of the container's standard err
+	StderrCallback func(string)
 }
 
 func (o Options) Apply(t *Options) {
