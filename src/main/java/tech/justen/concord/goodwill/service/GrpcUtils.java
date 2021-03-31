@@ -5,6 +5,7 @@ package tech.justen.concord.goodwill.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.protobuf.Any;
@@ -85,7 +86,20 @@ public class GrpcUtils {
             }
             return result;
         }
-        throw new GrpcValueException(v);
+        if (v.is(JSONValue.class)) {
+            JSONValue val = v.unpack(JSONValue.class);
+            try {
+                Class<?> clazz = Class.forName(val.getClass_());
+                return objectMapper.readValue(val.getJson().toStringUtf8(), clazz);
+            } catch (ClassNotFoundException e) {
+                throw new GrpcTypeException(val.getClass_());
+            } catch (JsonMappingException e) {
+                throw new GrpcValueException("JSON Mapping failed", e);
+            } catch (JsonProcessingException e) {
+                throw new GrpcValueException("JSON Parsing failed", e);
+            }
+        }
+        throw new GrpcTypeException(v);
     }
 
     private static Any any(Message msg) {
@@ -112,9 +126,9 @@ public class GrpcUtils {
                             .setJson(ByteString.copyFrom(json))
                             .build())).build();
         } catch (JsonProcessingException e) {
-            throw new GrpcValueException(objClass);
+            throw new GrpcTypeException(objClass);
         }
-        throw new GrpcValueException(objClass);
+        throw new GrpcTypeException(objClass);
     }
 
     private static Any getAny(Date value) {

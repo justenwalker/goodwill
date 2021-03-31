@@ -140,6 +140,8 @@ public class GrpcContextService extends ContextServiceGrpc.ContextServiceImplBas
                 return Long.class;
             case "bool":
                 return Boolean.class;
+            case "json":
+                return Object.class;
             case "null":
                 return Object.class;
         }
