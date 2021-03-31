@@ -6,6 +6,7 @@ package gw
 import (
 	"context"
 	"fmt"
+	"go.justen.tech/goodwill/gw/jsonstore"
 
 	"go.justen.tech/goodwill/gw/config"
 	"go.justen.tech/goodwill/gw/docker"
@@ -64,6 +65,10 @@ func (c *Task) Config() *config.Service {
 
 func (c *Task) Secret() *secret.Service {
 	return secret.NewService(c.OrgName, c.conn)
+}
+
+func (c *Task) JSONStore(name string) *jsonstore.Store {
+	return jsonstore.NewService(c.OrgName, name, c.conn)
 }
 
 func (c *Task) Lock() *lock.Service {

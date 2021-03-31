@@ -194,6 +194,49 @@ func KeyValue(ts *gw.Task) error {
 	return nil
 }
 
+// JSONStore tests the json store task
+func JSONStore(ts *gw.Task) error {
+	type serviceObject struct {
+		Users   []string `json:"users"`
+		Service string   `json:"service"`
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*2)
+	defer cancel()
+	fmt.Println("====== JSONStore")
+	js := ts.JSONStore("TestStore")
+	fmt.Println("Put service_c")
+	if err := js.Put(ctx, "service_c", values.JSON{
+		Value: serviceObject{
+			Users:   []string{"mike", "alice"},
+			Service: "service_c",
+		},
+	}); err != nil {
+		return fmt.Errorf("failed insert service_c: %w", err)
+	}
+	fmt.Println("Execute lookupServiceByUser")
+	var result values.JSON
+	if err := js.ExecuteQuery(ctx, "lookupServiceByUser", map[string]interface{}{
+		"users": []string{"mike"},
+	}, &result); err != nil {
+		return fmt.Errorf("failed lookupServiceByUser: %w", err)
+	}
+	fmt.Println("jsonStore.lookupServiceByUser:", result)
+
+	fmt.Println("Remove service_c")
+	removed, err := js.Delete(ctx, "service_c")
+	if err != nil {
+		return fmt.Errorf("failed delete service_c: %w", err)
+	}
+	fmt.Println("removed:", removed)
+	fmt.Println("Remove service_c (again)")
+	removed, err = js.Delete(ctx, "service_c")
+	if err != nil {
+		return fmt.Errorf("failed delete service_c: %w", err)
+	}
+	fmt.Println("removed:", removed)
+	return nil
+}
+
 // Docker runs a docker container
 func Docker(ts *gw.Task) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*2)

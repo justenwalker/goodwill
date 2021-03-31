@@ -28,6 +28,10 @@ flows:
     - task: goodwill
       in:
         task: KeyValue
+    - checkpoint: "jsonstore"
+    - task: goodwill
+      in:
+        task: JSONStore
     - checkpoint: "docker"
     - task: goodwill
       in:
