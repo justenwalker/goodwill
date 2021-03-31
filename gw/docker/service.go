@@ -41,8 +41,6 @@ func (c *Service) RunContainer(ctx context.Context, image string, opts ...Option
 		WorkDir:          options.WorkDir,
 		EntryPoint:       options.EntryPoint,
 		Command:          options.Command,
-		Cpu:              options.Cpu,
-		Memory:           options.Memory,
 		Env:              options.Env,
 		EnvFile:          options.EnvFile,
 		Labels:           options.Labels,

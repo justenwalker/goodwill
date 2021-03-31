@@ -22,10 +22,6 @@ type Options struct {
 	EntryPoint string
 	// Command is the list of command arguments to pass to the container
 	Command []string
-	// Cpu is the amount of cpu to limit the container
-	Cpu string
-	// Memory is the amount of memory to limit the container
-	Memory string
 	// Env contains additional environment variables to set
 	Env map[string]string
 	// EnvFile loads the given file with the list of environment variables and values
@@ -101,28 +97,6 @@ type commandOption []string
 
 func (o commandOption) Apply(spec *Options) {
 	spec.Command = o
-}
-
-// CPU sets the cpu shares
-func CPU(cpu string) Option {
-	return cpuOption(cpu)
-}
-
-type cpuOption string
-
-func (o cpuOption) Apply(spec *Options) {
-	spec.Cpu = string(o)
-}
-
-// Memory sets the maximum memory the container may use
-func Memory(mem string) Option {
-	return memoryOption(mem)
-}
-
-type memoryOption string
-
-func (o memoryOption) Apply(spec *Options) {
-	spec.Memory = string(o)
 }
 
 // Env sets an environment variable in the container
