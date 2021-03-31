@@ -189,6 +189,7 @@ func Release() error {
 	if ver == "" {
 		return fmt.Errorf("VERSION not set")
 	}
+	ver = strings.TrimPrefix(ver, "v")
 	if err := sh.Run("mvn", "versions:set", "-DnewVersion="+ver); err != nil {
 		return fmt.Errorf("error setting project version: %w", err)
 	}
