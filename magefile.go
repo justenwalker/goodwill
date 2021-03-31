@@ -183,6 +183,7 @@ func buildAllGoBinaries() error {
 
 func Release() error {
 	mg.Deps(Clean)
+	mg.SerialDeps(Dependencies, Generate)
 	debug.Println("==> set project version")
 	ver := os.Getenv("VERSION")
 	if ver == "" {
@@ -203,7 +204,8 @@ func Release() error {
 	if err := sh.Run("git", "tag", "--annotate", "-m", "Release v"+ver, "v"+ver); err != nil {
 		return err
 	}
-	return Package()
+	mg.SerialDeps(PackageJAR, sha256Sums)
+	return nil
 }
 
 func Snapshot() error {
