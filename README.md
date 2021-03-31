@@ -36,7 +36,7 @@ In your `concord.yml`, you can call the go code using the `goodwill` task.
 ```yaml
 configuration:
   dependencies:
-    - https://github.com/justenwalker/goodwill/releases/download/v0.1.0/goodwill-0.1.0.jar
+    - https://github.com/justenwalker/goodwill/releases/download/v0.2.0/goodwill-0.2.0.jar
 
 flows:
   default:
