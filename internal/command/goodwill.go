@@ -34,7 +34,11 @@ func Run() int {
 	return 0
 }
 
-func parsePackage(flg flags) (*TemplateData, error) {
+type ParsedData struct {
+	Functions []parse.TaskFunction
+}
+
+func parsePackage(flg flags) (*ParsedData, error) {
 	files, err := getGoFiles(flg.Dir, flg)
 	if err != nil {
 		return nil, fmt.Errorf("could not get go files to inspect: %w", err)
@@ -50,13 +54,12 @@ func parsePackage(flg flags) (*TemplateData, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &TemplateData{
-		Package:   info.DocPkg.Name,
+	return &ParsedData{
 		Functions: funcs,
 	}, nil
 }
 
-func compile(flg flags, td TemplateData) error {
+func compile(flg flags, td ParsedData) error {
 	file, err := mainFile(flg.Dir, td)
 	if err != nil {
 		return fmt.Errorf("could not generate main file: %w", err)
@@ -72,13 +75,13 @@ func compile(flg flags, td TemplateData) error {
 	return nil
 }
 
-func mainFile(dir string, data TemplateData) (string, error) {
+func mainFile(dir string, data ParsedData) (string, error) {
 	f, err := ioutil.TempFile(dir, "goodwill-main.*.go")
 	if err != nil {
 		return "", err
 	}
 	defer f.Close()
-	return f.Name(), mainTemplate().Execute(f, data)
+	return f.Name(), renderMain(f, data)
 }
 
 func compileGoFiles(files []string, flg flags, out string) error {

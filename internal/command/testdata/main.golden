@@ -1,0 +1,45 @@
+// +build goodwill
+
+package main
+
+import (
+	"fmt"
+	gw "go.justen.tech/goodwill/gw"
+	"os"
+	"strings"
+)
+
+func dieOnError(err error) {
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+func usage() {
+	fmt.Printf("Usage: %s FUNCTION\n", os.Args[0])
+	fmt.Println("Functions:")
+	fmt.Println("\tDefault\tDefault Doc")
+	fmt.Println("\tTask1\tTask 1 Doc")
+	fmt.Println("\tTask2\tTask 2 Doc")
+	os.Exit(128)
+}
+func main() {
+	if len(os.Args) < 2 {
+		fmt.Fprintln(os.Stderr, "Must provide a function name")
+		usage()
+	}
+	funcName := os.Args[1]
+	switch strings.ToLower(funcName) {
+	case "default":
+		dieOnError(gw.Run(Default))
+		return
+	case "task1":
+		dieOnError(gw.Run(Task1))
+		return
+	case "task2":
+		dieOnError(gw.Run(Task2))
+		return
+	}
+	fmt.Fprintln(os.Stderr, "Unknown function name:", funcName)
+	usage()
+}
