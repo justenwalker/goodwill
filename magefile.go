@@ -278,6 +278,8 @@ func precompileTestFlow() error {
 func E2E() error {
 	mg.Deps(Package, E2EUp)
 	mg.SerialDeps(vendorTestFlow, precompileTestFlow)
+	debug.Println("===> API Key:", authToken)
+
 	runE2ETest("compiled", []payloadFile{
 		{filepath.Join(testDir, "concord.yml"), "concord.yml"},
 		{jar.Filename, "lib/goodwill.jar"},
