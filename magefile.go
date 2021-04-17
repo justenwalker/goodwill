@@ -6,11 +6,10 @@
 package main
 
 import (
-	"encoding/hex"
-	"os"
 	"archive/zip"
 	"bytes"
 	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/magefile/mage/mg"
@@ -22,6 +21,7 @@ import (
 	"mime"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
@@ -63,6 +63,13 @@ func Clean() error {
 		}
 	}
 	return nil
+}
+
+func License() error {
+	debug.Println("===> add license header")
+	return sh.RunV("addlicense", "-v",
+		"-f", filepath.Join(".", "HEADER"),
+		"src", "gw", "internal", "test", "main.go", "magefile.go", "pom.xml")
 }
 
 // Build the Go binary only
