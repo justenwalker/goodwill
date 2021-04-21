@@ -74,8 +74,8 @@ The `goodwill` task can take several optional `in` parameters.
 - `buildDir`: Override the output directory for goodwill generated files. (default: `.goodwill`)'
 
 ### Go Environment Settings
-- `goos`: Override the OS target of the concord agent instead of auto-detecting it.
-- `goarch`: Override the OS Architecture of the target instead of auto-detecting it.
+- `GOOS`: Override the OS target of the concord agent instead of auto-detecting it.
+- `GOARCH`: Override the OS Architecture of the target instead of auto-detecting it.
 - `GOPROXY`: Set the `GOPROXY` environment variable
 - `GONOPROXY`: Set the `GONOPROXY` environment variable
 - `GOPRIVATE`: Set the `GOPRIVATE` environment variable

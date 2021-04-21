@@ -13,10 +13,6 @@ public class TaskParams {
 
     public static final String GO_DOCKER_IMAGE_KEY = "goDockerImage";
 
-    public static final String GOOS_KEY = "goos";
-
-    public static final String GOARCH_KEY = "goarch";
-
     public static final String TASK_NAME_KEY = "task";
 
     public static final String BINARY_KEY = "binary";
@@ -30,6 +26,10 @@ public class TaskParams {
     public static final String INSTALL_GO_KEY = "installGo";
 
     public static final String GO_VERSION_KEY = "goVersion";
+
+    public static final String GOOS_KEY = "GOOS";
+
+    public static final String GOARCH_KEY = "GOARCH";
 
     public static final String GOPROXY_KEY = "GOPROXY";
 
