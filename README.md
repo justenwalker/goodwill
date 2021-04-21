@@ -67,7 +67,7 @@ The `goodwill` task can take several optional `in` parameters.
 - `debug`: Enable debug logging for compilation. (default: `false`)
 
 ### Build
-- `goVersion`: Set the version of Go to install. (Default: `1.16.2`)
+- `goVersion`: Set the version of Go to install. (Default: `1.16.3`)
 - `goDockerImage`: Override the image to use when building a goodwill flow in Docker (Default: `golang:${goVersion}`)
 - `useDocker`: Use a docker image to compile the goodwill binary.
 - `installGo`: If compilation is required and go is not found, install it in the task workspace (Default: `true`)
