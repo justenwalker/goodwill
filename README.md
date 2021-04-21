@@ -1,6 +1,6 @@
 # Goodwill
 
-Goodwill is a plugin for [Walmart Labs Concord](https://concord.walmartlabs.com/). It provides a way to write tasks on
+Goodwill is a plugin for [Walmart Labs Concord](https://concord.walmartlabs.com/). It provides a way to write tasks in
 Go by providing a bridge to the Java runtime over GRPC.
 
 ## Quick Start
