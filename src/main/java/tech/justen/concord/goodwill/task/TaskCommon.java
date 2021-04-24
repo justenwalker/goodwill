@@ -282,7 +282,7 @@ public class TaskCommon {
             try (BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                 String line;
                 while ((line = stdout.readLine()) != null) {
-                    processLog.info("[INFO ] GOODWILL: {}", line);
+                    processLog.info(line);
                 }
             } catch (IOException e) {
                 log.error("error reading stdout", e);
@@ -292,7 +292,7 @@ public class TaskCommon {
             try (BufferedReader stderr = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
                 String line;
                 while ((line = stderr.readLine()) != null) {
-                    processLog.info("[WARN ] GOODWILL: {}", line);
+                    processLog.warn(line);
                 }
             } catch (IOException e) {
                 log.error("error reading stderr", e);
