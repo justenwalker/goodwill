@@ -145,7 +145,10 @@ func sha256Sums() (err error) {
 // Ensure Go module dependencies are downloaded
 func Dependencies() error {
 	debug.Println("==> download go dependencies")
-	return sh.RunV(mg.GoCmd(), "mod", "download")
+	if err := sh.RunV(mg.GoCmd(), "mod", "tidy"); err != nil {
+		return err
+	}
+	return sh.RunV(mg.GoCmd(), "get")
 }
 
 // Generate Protobuf code for Go and Java
