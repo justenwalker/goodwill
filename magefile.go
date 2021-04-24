@@ -342,6 +342,11 @@ func E2E() error {
 		{jar.Filename, "lib/goodwill.jar"},
 		{filepath.Join(testDir, "flow", "goodwill.tasks"), "goodwill.tasks"},
 	})
+	runE2ETest("v2", []payloadFile{
+		{filepath.Join(testDir, "concord-v2.yml"), "concord.yml"},
+		{jar.Filename, "lib/goodwill.jar"},
+		{filepath.Join(testDir, "flow", "goodwill.tasks"), "goodwill.tasks"},
+	})
 	return nil
 }
 

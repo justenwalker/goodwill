@@ -1,0 +1,39 @@
+# Copyright 2021, Justen Walker
+# SPDX-License-Identifier: Apache-2.0
+
+configuration:
+  runtime: concord-v2
+  arguments:
+    goodwillCfg:
+      useDocker: true
+      goVersion: 1.16.1
+flows:
+  default:
+    - checkpoint: "start"
+    - task: goodwill
+      in:
+        task: default
+    - checkpoint: "variables"
+    - task: goodwill
+      in:
+        task: SetVariables
+    - checkpoint: "crypto"
+    - task: goodwill
+      in:
+        task: Crypto
+    - checkpoint: "lock"
+    - task: goodwill
+      in:
+        task: Lock
+    - checkpoint: "kv"
+    - task: goodwill
+      in:
+        task: KeyValue
+    - checkpoint: "jsonstore"
+    - task: goodwill
+      in:
+        task: JSONStore
+    - checkpoint: "docker"
+    - task: goodwill
+      in:
+        task: Docker
