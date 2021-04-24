@@ -71,42 +71,42 @@ public class TaskConfigImpl implements TaskConfig {
 
     @Override
     public String processId() {
-        return txId;
+        return notNull(txId);
     }
 
     @Override
     public String orgId() {
-        return orgId;
+        return notNull(orgId);
     }
 
     @Override
     public String projectName() {
-        return projectName;
+        return notNull(projectName);
     }
 
     @Override
     public String projectId() {
-        return projectId;
+        return notNull(projectId);
     }
 
     @Override
     public String repoName() {
-        return repoName;
+        return notNull(repoName);
     }
 
     @Override
     public String repoId() {
-        return repoId;
+        return notNull(repoId);
     }
 
     @Override
     public String repoUrl() {
-        return repoURL;
+        return notNull(repoURL);
     }
 
     @Override
     public String orgName() {
-        return orgName;
+        return notNull(orgName);
     }
 
     @Override
@@ -119,5 +119,12 @@ public class TaskConfigImpl implements TaskConfig {
             return "";
         }
         return uuid.toString();
+    }
+
+    private static String notNull(String str) {
+        if (str == null) {
+            return "";
+        }
+        return str;
     }
 }
