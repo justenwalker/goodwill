@@ -7,6 +7,7 @@ package main
 
 import (
 	"archive/zip"
+	"bufio"
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
@@ -118,6 +119,44 @@ func Sign() error {
 		return fmt.Errorf("SIGNIFY_KEY not set")
 	}
 	return sh.RunV("signify", "-S", "-s", key, "-m", sumFile, "-x", sumFile+".sig")
+}
+
+func Verify() error {
+	mg.Deps(pomVersion)
+	pubFile := filepath.Join(curDir, "goodwill.pub")
+	sumFile = filepath.Join(distDir, fmt.Sprintf("goodwill_%s_SHA256SUMS", version))
+	debug.Println("==> verify sum signatures")
+	if err := sh.RunV("signify", "-V", "-p", pubFile, "-m", sumFile); err != nil {
+		return err
+	}
+	debug.Println("==> verify sha sums")
+	return verifySHA256Sums()
+}
+
+func verifySHA256Sums() error {
+	sumFile = filepath.Join(distDir, fmt.Sprintf("goodwill_%s_SHA256SUMS", version))
+	data, err := ioutil.ReadFile(sumFile)
+	if err != nil {
+		return err
+	}
+	sc := bufio.NewScanner(bytes.NewBuffer(data))
+	for sc.Scan() {
+		fields := strings.Split(strings.TrimSpace(sc.Text()), "  ")
+		if len(fields) != 2 {
+			continue
+		}
+		filename, expected := fields[1], fields[0]
+		filename = filepath.Join(distDir, filename)
+		hash, err := hashFile(filename)
+		if err != nil {
+			return fmt.Errorf("%q: error hashing file: %w", filename, err)
+		}
+		if hash != expected {
+			return fmt.Errorf("%q: hash match. got=%q, expected=%q", filename, hash, expected)
+		}
+		debug.Printf("%s\tOK\n", filename)
+	}
+	return nil
 }
 
 func sha256Sums() (err error) {
