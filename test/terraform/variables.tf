@@ -33,7 +33,7 @@ variable "ipv6_cidr" {
 }
 variable "concord_version" {
   type    = string
-  default = "1.80.0"
+  default = "1.84.0"
 }
 variable "goprivate" {
   type    = string
