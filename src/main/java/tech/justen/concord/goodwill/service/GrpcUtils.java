@@ -17,6 +17,9 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import tech.justen.concord.goodwill.grpc.ContextProto.*;
 
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 
 @SuppressWarnings("unchecked")
@@ -184,7 +187,7 @@ public class GrpcUtils {
     }
 
     public static StatusRuntimeException toStatusException(Exception ex) {
-        return Status.INTERNAL.withDescription(ex.getMessage()).withCause(ex).asRuntimeException();
+        return Status.INTERNAL.withDescription(exceptionDescription(ex)).withCause(ex).asRuntimeException();
     }
 
     public static StatusRuntimeException toStatusException(ApiException ex, String desc) {
@@ -209,5 +212,17 @@ public class GrpcUtils {
             status = status.augmentDescription(desc);
         }
         return status.withDescription(ex.getMessage()).withCause(ex).asRuntimeException();
+    }
+
+    private static String exceptionDescription(Throwable ex) {
+        StringWriter sw = new StringWriter();
+        sw.append(ex.getClass().getName());
+        if (ex.getMessage() != null) {
+            sw.append(": ");
+            sw.append(ex.getMessage());
+            sw.append('\n');
+        }
+        ex.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
     }
 }

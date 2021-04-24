@@ -34,7 +34,7 @@ public class GrpcDockerService extends DockerServiceGrpc.DockerServiceImplBase {
             responseObserver.onCompleted();
         } catch (Exception e) {
             log.error("GrpcService: runContainer error", e);
-            responseObserver.onError(e);
+            responseObserver.onError(GrpcUtils.toStatusException(e));
         }
     }
 }
