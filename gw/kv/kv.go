@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	"go.justen.tech/goodwill/gw/taskcontext"
-	"go.justen.tech/goodwill/gw/values"
+	"go.justen.tech/goodwill/gw/value"
 	"google.golang.org/grpc"
 )
 
@@ -34,26 +34,26 @@ const (
 )
 
 // PutString sets a string value at the given key
-func (c *Service) PutString(ctx context.Context, key string, value string) error {
-	return c.ex.EvaluateParams(ctx, kvPutStringExpr, values.Discard, map[string]values.Value{
-		kvKeyVar:   values.String(key),
-		kvValueVar: values.String(value),
+func (c *Service) PutString(ctx context.Context, key string, val string) error {
+	return c.ex.EvaluateParams(ctx, kvPutStringExpr, value.Discard, map[string]value.Value{
+		kvKeyVar:   value.String(key),
+		kvValueVar: value.String(val),
 	})
 }
 
 // PutLong sets an integer value at the given key
-func (c *Service) PutLong(ctx context.Context, key string, value int64) error {
-	return c.ex.EvaluateParams(ctx, kvPutLongExpr, values.Discard, map[string]values.Value{
-		kvKeyVar:   values.String(key),
-		kvValueVar: values.Int64(value),
+func (c *Service) PutLong(ctx context.Context, key string, val int64) error {
+	return c.ex.EvaluateParams(ctx, kvPutLongExpr, value.Discard, map[string]value.Value{
+		kvKeyVar:   value.String(key),
+		kvValueVar: value.Int64(val),
 	})
 }
 
 // GetString gets a string value at the given key
 func (c *Service) GetString(ctx context.Context, key string) (string, error) {
-	var o values.String
-	if err := c.ex.EvaluateParams(ctx, kvGetStringExpr, &o, map[string]values.Value{
-		kvKeyVar: values.String(key),
+	var o value.String
+	if err := c.ex.EvaluateParams(ctx, kvGetStringExpr, &o, map[string]value.Value{
+		kvKeyVar: value.String(key),
 	}); err != nil {
 		return "", err
 	}
@@ -62,12 +62,12 @@ func (c *Service) GetString(ctx context.Context, key string) (string, error) {
 
 // GetLong gets an integer value at the given key
 func (c *Service) GetLong(ctx context.Context, key string) (int64, error) {
-	if err := c.ex.SetVariable(ctx, kvKeyVar, values.String(key)); err != nil {
+	if err := c.ex.SetVariable(ctx, kvKeyVar, value.String(key)); err != nil {
 		return 0, fmt.Errorf("failed to set %s = %q", kvKeyVar, key)
 	}
-	var o values.Int64
-	if err := c.ex.EvaluateParams(ctx, kvGetLongExpr, &o, map[string]values.Value{
-		kvKeyVar: values.String(key),
+	var o value.Int64
+	if err := c.ex.EvaluateParams(ctx, kvGetLongExpr, &o, map[string]value.Value{
+		kvKeyVar: value.String(key),
 	}); err != nil {
 		return 0, err
 	}
@@ -76,16 +76,16 @@ func (c *Service) GetLong(ctx context.Context, key string) (int64, error) {
 
 // Remove unsets the value at the given key
 func (c *Service) Remove(ctx context.Context, key string) error {
-	return c.ex.EvaluateParams(ctx, kvRemoveExpr, values.Discard, map[string]values.Value{
-		kvKeyVar: values.String(key),
+	return c.ex.EvaluateParams(ctx, kvRemoveExpr, value.Discard, map[string]value.Value{
+		kvKeyVar: value.String(key),
 	})
 }
 
 // Inc increments the given key's value by 1, returning the incremented value
 func (c *Service) Inc(ctx context.Context, key string) (int64, error) {
-	var o values.Int64
-	if err := c.ex.EvaluateParams(ctx, kvIncExpr, &o, map[string]values.Value{
-		kvKeyVar: values.String(key),
+	var o value.Int64
+	if err := c.ex.EvaluateParams(ctx, kvIncExpr, &o, map[string]value.Value{
+		kvKeyVar: value.String(key),
 	}); err != nil {
 		return 0, err
 	}

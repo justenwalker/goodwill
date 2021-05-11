@@ -11,7 +11,7 @@ import (
 	"go.justen.tech/goodwill/gw"
 	"go.justen.tech/goodwill/gw/docker"
 	"go.justen.tech/goodwill/gw/secret"
-	"go.justen.tech/goodwill/gw/values"
+	"go.justen.tech/goodwill/gw/value"
 	"io/ioutil"
 	"os"
 	"time"
@@ -35,7 +35,7 @@ func Default(ts *gw.Task) error {
 func SetVariables(ts *gw.Task) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*2)
 	defer cancel()
-	var value values.Time
+	var value value.Time
 	tc := ts.Context()
 	fmt.Println("====== Evaluate Expression")
 	if err := tc.Evaluate(ctx, "${datetime.current()}", &value); err != nil {
@@ -205,7 +205,7 @@ func JSONStore(ts *gw.Task) error {
 	fmt.Println("====== JSONStore")
 	js := ts.JSONStore("TestStore")
 	fmt.Println("Put service_c")
-	if err := js.Put(ctx, "service_c", values.JSON{
+	if err := js.Put(ctx, "service_c", value.JSON{
 		Value: serviceObject{
 			Users:   []string{"mike", "alice"},
 			Service: "service_c",
@@ -214,7 +214,7 @@ func JSONStore(ts *gw.Task) error {
 		return fmt.Errorf("failed insert service_c: %w", err)
 	}
 	fmt.Println("Execute lookupServiceByUser")
-	var result values.JSON
+	var result value.JSON
 	if err := js.ExecuteQuery(ctx, "lookupServiceByUser", map[string]interface{}{
 		"users": []string{"mike"},
 	}, &result); err != nil {

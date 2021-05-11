@@ -9,13 +9,13 @@ import (
 	c2 "context"
 	"fmt"
 	gw2 "go.justen.tech/goodwill/gw"
-	"go.justen.tech/goodwill/gw/values"
+	"go.justen.tech/goodwill/gw/value"
 )
 
 // PrintProcessID prints the concord process id
 func PrintProcessID(ts *gw2.Task) error {
 	tc := ts.Context()
-	var value values.String
+	var value value.String
 	if err := tc.Evaluate(c2.TODO(), "${txId}", &value); err != nil {
 		return err
 	}

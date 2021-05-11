@@ -6,7 +6,7 @@ package jsonstore
 import (
 	"context"
 	"go.justen.tech/goodwill/gw/taskcontext"
-	"go.justen.tech/goodwill/gw/values"
+	"go.justen.tech/goodwill/gw/value"
 	"google.golang.org/grpc"
 )
 
@@ -44,11 +44,11 @@ const (
 
 // ItemExists tests if an item exists in the store
 func (c *Store) ItemExists(ctx context.Context, itemPath string) (bool, error) {
-	var result values.Bool
-	if err := c.ex.EvaluateParams(ctx, jsonStoreItemExists, &result, map[string]values.Value{
-		jsonStoreOrg:      values.String(c.orgName),
-		jsonStoreName:     values.String(c.store),
-		jsonStoreItemPath: values.String(itemPath),
+	var result value.Bool
+	if err := c.ex.EvaluateParams(ctx, jsonStoreItemExists, &result, map[string]value.Value{
+		jsonStoreOrg:      value.String(c.orgName),
+		jsonStoreName:     value.String(c.store),
+		jsonStoreItemPath: value.String(itemPath),
 	}); err != nil {
 		return false, err
 	}
@@ -56,64 +56,64 @@ func (c *Store) ItemExists(ctx context.Context, itemPath string) (bool, error) {
 }
 
 // Get gets the item in the json store
-func (c *Store) Get(ctx context.Context, itemPath string, out values.ValueOut) error {
-	return c.ex.EvaluateParams(ctx, jsonStoreGet, out, map[string]values.Value{
-		jsonStoreOrg:      values.String(c.orgName),
-		jsonStoreName:     values.String(c.store),
-		jsonStoreItemPath: values.String(itemPath),
+func (c *Store) Get(ctx context.Context, itemPath string, out value.ValueOut) error {
+	return c.ex.EvaluateParams(ctx, jsonStoreGet, out, map[string]value.Value{
+		jsonStoreOrg:      value.String(c.orgName),
+		jsonStoreName:     value.String(c.store),
+		jsonStoreItemPath: value.String(itemPath),
 	})
 }
 
 // Delete an item in the json store.
 // returns true if the item was deleted, otherwise false.
 func (c *Store) Delete(ctx context.Context, itemPath string) (bool, error) {
-	var value values.Bool
-	if err := c.ex.EvaluateParams(ctx, jsonStoreDelete, &value, map[string]values.Value{
-		jsonStoreOrg:      values.String(c.orgName),
-		jsonStoreName:     values.String(c.store),
-		jsonStoreItemPath: values.String(itemPath),
+	var v value.Bool
+	if err := c.ex.EvaluateParams(ctx, jsonStoreDelete, &v, map[string]value.Value{
+		jsonStoreOrg:      value.String(c.orgName),
+		jsonStoreName:     value.String(c.store),
+		jsonStoreItemPath: value.String(itemPath),
 	}); err != nil {
 		return false, err
 	}
-	return bool(value), nil
+	return bool(v), nil
 }
 
 // Put puts the item in the json store
-func (c *Store) Put(ctx context.Context, itemPath string, data values.Value) error {
-	return c.ex.EvaluateParams(ctx, jsonStorePut, values.Discard, map[string]values.Value{
-		jsonStoreOrg:      values.String(c.orgName),
-		jsonStoreName:     values.String(c.store),
-		jsonStoreItemPath: values.String(itemPath),
+func (c *Store) Put(ctx context.Context, itemPath string, data value.Value) error {
+	return c.ex.EvaluateParams(ctx, jsonStorePut, value.Discard, map[string]value.Value{
+		jsonStoreOrg:      value.String(c.orgName),
+		jsonStoreName:     value.String(c.store),
+		jsonStoreItemPath: value.String(itemPath),
 		jsonStoreItemData: data,
 	})
 }
 
 // Upsert inserts or updates an item
-func (c *Store) Upsert(ctx context.Context, itemPath string, data values.Value) error {
-	return c.ex.EvaluateParams(ctx, jsonStoreUpsert, values.Discard, map[string]values.Value{
-		jsonStoreOrg:      values.String(c.orgName),
-		jsonStoreName:     values.String(c.store),
-		jsonStoreItemPath: values.String(itemPath),
+func (c *Store) Upsert(ctx context.Context, itemPath string, data value.Value) error {
+	return c.ex.EvaluateParams(ctx, jsonStoreUpsert, value.Discard, map[string]value.Value{
+		jsonStoreOrg:      value.String(c.orgName),
+		jsonStoreName:     value.String(c.store),
+		jsonStoreItemPath: value.String(itemPath),
 		jsonStoreItemData: data,
 	})
 }
 
 // UpsertQuery creates or updates a named query
 func (c *Store) UpsertQuery(ctx context.Context, queryName string, queryText string) error {
-	return c.ex.EvaluateParams(ctx, jsonStoreUpsertQuery, values.Discard, map[string]values.Value{
-		jsonStoreOrg:       values.String(c.orgName),
-		jsonStoreName:      values.String(c.store),
-		jsonStoreQueryName: values.String(queryName),
-		jsonStoreQueryText: values.String(queryText),
+	return c.ex.EvaluateParams(ctx, jsonStoreUpsertQuery, value.Discard, map[string]value.Value{
+		jsonStoreOrg:       value.String(c.orgName),
+		jsonStoreName:      value.String(c.store),
+		jsonStoreQueryName: value.String(queryName),
+		jsonStoreQueryText: value.String(queryText),
 	})
 }
 
 // ExecuteQuery executes a named query
-func (c *Store) ExecuteQuery(ctx context.Context, queryName string, params map[string]interface{}, out values.ValueOut) error {
-	return c.ex.EvaluateParams(ctx, jsonStoreExecQuery, out, map[string]values.Value{
-		jsonStoreOrg:         values.String(c.orgName),
-		jsonStoreName:        values.String(c.store),
-		jsonStoreQueryName:   values.String(queryName),
-		jsonStoreQueryParams: values.JSON{Value: params},
+func (c *Store) ExecuteQuery(ctx context.Context, queryName string, params map[string]interface{}, out value.ValueOut) error {
+	return c.ex.EvaluateParams(ctx, jsonStoreExecQuery, out, map[string]value.Value{
+		jsonStoreOrg:         value.String(c.orgName),
+		jsonStoreName:        value.String(c.store),
+		jsonStoreQueryName:   value.String(queryName),
+		jsonStoreQueryParams: value.JSON{Value: params},
 	})
 }

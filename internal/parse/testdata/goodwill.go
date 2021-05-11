@@ -9,13 +9,13 @@ import (
 	"context"
 	"fmt"
 	"go.justen.tech/goodwill/gw"
-	"go.justen.tech/goodwill/gw/values"
+	"go.justen.tech/goodwill/gw/value"
 )
 
 // PrintWorkDir prints the working directory
 func PrintWorkDir(ts *gw.Task) error {
 	tc := ts.Context()
-	var value values.String
+	var value value.String
 	if err := tc.Evaluate(context.TODO(), "${workDir}", &value); err != nil {
 		return err
 	}

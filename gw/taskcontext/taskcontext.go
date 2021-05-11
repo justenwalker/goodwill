@@ -6,7 +6,7 @@ package taskcontext
 import (
 	"context"
 	"fmt"
-	"go.justen.tech/goodwill/gw/values"
+	"go.justen.tech/goodwill/gw/value"
 	"go.justen.tech/goodwill/internal/pb"
 	"google.golang.org/grpc"
 )
@@ -22,7 +22,7 @@ func NewService(conn grpc.ClientConnInterface) *Service {
 }
 
 // SetVariable sets the tasks variable to the given value
-func (c *Service) SetVariable(ctx context.Context, name string, value values.Value) error {
+func (c *Service) SetVariable(ctx context.Context, name string, value value.Value) error {
 	variable, err := newVariable(name, value)
 	if err != nil {
 		return err
@@ -32,12 +32,12 @@ func (c *Service) SetVariable(ctx context.Context, name string, value values.Val
 }
 
 // GetVariable gets the tasks variable to the given value
-func (c *Service) GetVariable(ctx context.Context, name string, out values.ValueOut) error {
-	value, err := c.client.GetVariable(ctx, &pb.VariableName{Name: name})
+func (c *Service) GetVariable(ctx context.Context, name string, out value.ValueOut) error {
+	v, err := c.client.GetVariable(ctx, &pb.VariableName{Name: name})
 	if err != nil {
 		return err
 	}
-	return values.Unmarshal(value, out)
+	return value.Unmarshal(v, out)
 }
 
 // GetVariableNames gets the list of variable names currently set in the task
@@ -56,8 +56,8 @@ func (c *Service) GetVariables(ctx context.Context) (map[string]interface{}, err
 		return nil, err
 	}
 	variables := make(map[string]interface{})
-	for key, value := range vars.Value {
-		v, err := values.Interface(value)
+	for key, v := range vars.Value {
+		v, err := value.Interface(v)
 		if err != nil {
 			return nil, err
 		}
@@ -69,10 +69,10 @@ func (c *Service) GetVariables(ctx context.Context) (map[string]interface{}, err
 // EvaluateParams evaluates the given expression, and returns the result into the output value.
 // The given map of parameters are set as variables before the expression is evaluated,
 // which approximates a parameterized query; allowing a safer expression evaluation compared to string concatenation.
-func (c *Service) EvaluateParams(ctx context.Context, expr string, out values.ValueOut, params map[string]values.Value, ) error {
+func (c *Service) EvaluateParams(ctx context.Context, expr string, out value.ValueOut, params map[string]value.Value, ) error {
 	var parameters []*pb.Variable
 	for key, val := range params {
-		mv, err := values.Marshal(val)
+		mv, err := value.Marshal(val)
 		if err != nil {
 			return fmt.Errorf("failed to marshal parameter %q: %w", key, err)
 		}
@@ -89,16 +89,16 @@ func (c *Service) EvaluateParams(ctx context.Context, expr string, out values.Va
 	if err != nil {
 		return err
 	}
-	return values.Unmarshal(v, out)
+	return value.Unmarshal(v, out)
 }
 
 // EvaluateParams evaluates the given expression, and returns the result into the output value
-func (c *Service) Evaluate(ctx context.Context, expr string, out values.ValueOut) error {
+func (c *Service) Evaluate(ctx context.Context, expr string, out value.ValueOut) error {
 	return c.EvaluateParams(ctx, expr, out, nil)
 }
 
-func newVariable(key string, value values.Value) (*pb.Variable, error) {
-	v, err := values.Marshal(value)
+func newVariable(key string, val value.Value) (*pb.Variable, error) {
+	v, err := value.Marshal(val)
 	if err != nil {
 		return nil, err
 	}

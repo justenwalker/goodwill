@@ -14,7 +14,7 @@ import (
 	"go.justen.tech/goodwill/gw/lock"
 	"go.justen.tech/goodwill/gw/secret"
 	"go.justen.tech/goodwill/gw/taskcontext"
-	"go.justen.tech/goodwill/gw/values"
+	"go.justen.tech/goodwill/gw/value"
 	"google.golang.org/grpc"
 )
 
@@ -53,8 +53,8 @@ const (
 
 // Log emits a log entry on the process.
 func (c *Task) Log(ctx context.Context, format string, v ...interface{}) error {
-	return c.Context().EvaluateParams(ctx, logLineCallExpr, values.Discard, map[string]values.Value{
-		logLineVar: values.String(fmt.Sprintf(format, v...)),
+	return c.Context().EvaluateParams(ctx, logLineCallExpr, value.Discard, map[string]value.Value{
+		logLineVar: value.String(fmt.Sprintf(format, v...)),
 	})
 }
 
