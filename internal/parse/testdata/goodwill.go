@@ -6,19 +6,16 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"go.justen.tech/goodwill/gw"
 	"go.justen.tech/goodwill/gw/value"
 )
 
-// PrintWorkDir prints the working directory
-func PrintWorkDir(ts *gw.Task) error {
-	tc := ts.Context()
-	var value value.String
-	if err := tc.Evaluate(context.TODO(), "${workDir}", &value); err != nil {
-		return err
-	}
-	fmt.Println("workDir:", value)
+// Func only takes a task and returns an error
+func Func(ts *gw.Task) error {
 	return nil
+}
+
+// OutFunc takes a task and returns output variables and an error
+func OutFunc(ts *gw.Task) (map[string]value.Value, error) {
+	return nil, nil
 }

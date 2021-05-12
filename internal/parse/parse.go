@@ -22,13 +22,25 @@ type PkgInfo struct {
 }
 
 type TaskFunction struct {
-	Name string
-	Doc  string
+	Name    string
+	Doc     string
+	Context bool
+	OutVars bool
 }
 
-const GwPackage = "go.justen.tech/goodwill/gw"
-const TaskType = "Task"
-const ErrorType = "error"
+type ByName []TaskFunction
+
+func (fs ByName) Len() int {
+	return len(fs)
+}
+
+func (fs ByName) Less(i, j int) bool {
+	return fs[i].Name < fs[j].Name
+}
+
+func (fs ByName) Swap(i, j int) {
+	fs[i], fs[j] = fs[j], fs[i]
+}
 
 func Package(path string, files []string) (*PkgInfo, error) {
 	fset := token.NewFileSet()
@@ -68,8 +80,7 @@ func Package(path string, files []string) (*PkgInfo, error) {
 }
 
 func TaskFunctions(path string, info *PkgInfo) ([]TaskFunction, error) {
-	var funcs []TaskFunction
-	funcNames := make(map[string]struct{})
+	taskFuncs := make(map[string]TaskFunction)
 	imports := make(map[string]string)
 	for _, file := range info.AstPkg.Files {
 		for _, is := range file.Imports {
@@ -89,19 +100,18 @@ func TaskFunctions(path string, info *PkgInfo) ([]TaskFunction, error) {
 		}
 		for _, decl := range file.Decls {
 			if fn, ok := decl.(*ast.FuncDecl); ok {
-				name, ok := flowFunctionName(imports, fn)
+				tf, ok := taskFunction(imports, fn)
 				if ok {
-					funcNames[name] = struct{}{}
+					taskFuncs[tf.Name] = tf
 				}
 			}
 		}
 	}
+	var funcs []TaskFunction
 	for _, f := range info.DocPkg.Funcs {
-		if _, ok := funcNames[f.Name]; ok {
-			funcs = append(funcs, TaskFunction{
-				Name: f.Name,
-				Doc:  oneLine(f.Doc),
-			})
+		if tf, ok := taskFuncs[f.Name]; ok {
+			tf.Doc = oneLine(f.Doc)
+			funcs = append(funcs, tf)
 		}
 	}
 	return funcs, nil
@@ -119,34 +129,101 @@ func ident(node ast.Node) string {
 	return id.Name
 }
 
-func flowFunctionName(imports map[string]string, f *ast.FuncDecl) (string, bool) {
-	params := f.Type.Params
-	if len(params.List) != 1 {
-		return "", false
+func taskFunction(imports map[string]string, f *ast.FuncDecl) (TaskFunction, bool) {
+	fi := &functionInspector{
+		f:       f,
+		imports: imports,
 	}
-	p1 := params.List[0]
-	sexpr, ok := p1.Type.(*ast.StarExpr)
+	return fi.function()
+}
+
+type functionInspector struct {
+	f       *ast.FuncDecl
+	imports map[string]string
+}
+
+func (i *functionInspector) function() (tf TaskFunction, ok bool) {
+	params := i.f.Type.Params.List
+	switch len(params) {
+	case 1:
+		if !i.isTaskType(params[0]) {
+			return
+		}
+	case 2:
+		if !i.isContextType(params[0]) {
+			return
+		}
+		tf.Context = true
+		if !i.isTaskType(params[1]) {
+			return
+		}
+	default:
+		return
+	}
+	returns := i.f.Type.Results.List
+	switch len(returns) {
+	case 1:
+		if !i.isErrType(returns[0]) {
+			return
+		}
+	case 2:
+		if !i.isOutVars(returns[0]) {
+			return
+		}
+		tf.OutVars = true
+		if !i.isErrType(returns[1]) {
+			return
+		}
+	default:
+		return
+	}
+	tf.Name = ident(i.f.Name)
+	return tf, true
+}
+
+func (i *functionInspector) isTaskType(field *ast.Field) bool {
+	sexpr, ok := field.Type.(*ast.StarExpr)
 	if !ok {
-		return "", false
+		return false
 	}
-	selexpr, ok := sexpr.X.(*ast.SelectorExpr)
+	return i.isSelectorType(sexpr.X, "go.justen.tech/goodwill/gw", "Task")
+}
+
+func (i *functionInspector) isSelectorType(expr ast.Expr, pkg string, name string) bool {
+	selexpr, ok := expr.(*ast.SelectorExpr)
 	if !ok {
-		return "", false
+		return false
 	}
-	if pkg := ident(selexpr.X); imports[pkg] != GwPackage {
-		return "", false
+	if p := ident(selexpr.X); i.imports[p] != pkg {
+		return false
 	}
-	if ident(selexpr.Sel) != TaskType {
-		return "", false
+	if ident(selexpr.Sel) != name {
+		return false
 	}
-	// return
-	returns := f.Type.Results
-	if len(returns.List) != 1 {
-		return "", false
+	return true
+
+}
+
+func (i *functionInspector) isErrType(field *ast.Field) bool {
+	return ident(field.Type) == "error"
+}
+
+func (i *functionInspector) isOutVars(field *ast.Field) bool {
+	mtype, ok := field.Type.(*ast.MapType)
+	if !ok {
+		return false
 	}
-	r1 := returns.List[0]
-	if ident(r1.Type) != ErrorType {
-		return "", false
+	// key is a string
+	ktype, ok := mtype.Key.(*ast.Ident)
+	if !ok {
+		return false
 	}
-	return ident(f.Name), true
+	if ktype.Name != "string" {
+		return false
+	}
+	return i.isSelectorType(mtype.Value, "go.justen.tech/goodwill/gw/value", "Value")
+}
+
+func (i *functionInspector) isContextType(field *ast.Field) bool {
+	return i.isSelectorType(field.Type, "context", "Context")
 }

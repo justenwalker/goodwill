@@ -170,7 +170,7 @@ public class TaskCommon {
         return out.toString();
     }
 
-    public void execute() throws java.lang.Exception {
+    public Map<String, Object> execute() throws java.lang.Exception {
         Path workDir = config.workingDirectory();
         File goodwillDir = new File(workDir.toString(), params.getBuildDirectory());
         goodwillDir.mkdir();
@@ -199,6 +199,7 @@ public class TaskCommon {
         File certFile = new File(goodwillDir, "client.crt");
         File keyFile = new File(goodwillDir, "client.key");
         ca.generatePKI(caFile, certFile, keyFile);
+        Map<String, Object> taskResult = new HashMap<>();
         try {
             ApiClient apiClient = apiClientFactory.create(apiClientConfig);
             int port = 0;
@@ -212,7 +213,7 @@ public class TaskCommon {
                             .useTransportSecurity(caCert, caKey)
                             .addService(new GrpcDockerService(dockerService))
                             .addService(new GrpcConfigService(apiClientConfig, config))
-                            .addService(new GrpcContextService(contextService))
+                            .addService(new GrpcContextService(contextService, taskResult))
                             .addService(new GrpcSecretService(config, secretService, apiClient))
                             .addService(new GrpcLockService(lockService))
                             .build();
@@ -256,6 +257,7 @@ public class TaskCommon {
                 server.shutdown();
             }
         }
+        return taskResult;
     }
 
     private int randomPort() {

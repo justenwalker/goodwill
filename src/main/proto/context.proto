@@ -14,6 +14,8 @@ package context;
 service ContextService {
   rpc GetVariable(VariableName) returns (Value) {}
   rpc SetVariable(Variable) returns (SetVariableResult) {}
+  rpc SetVariables(Variables) returns (SetVariableResult) {}
+  rpc SetTaskResult(Variables) returns (SetVariableResult) {}
   rpc GetVariableNames(GetVariableNameParams) returns (VariableNameList) {}
   rpc GetVariables(GetVariablesRequest) returns (MapValue) {}
   rpc Evaluate(EvaluateRequest) returns (Value) {}
@@ -22,6 +24,10 @@ service ContextService {
 message GetVariablesRequest {}
 message SetVariableResult {}
 message GetVariableNameParams {}
+
+message Variables {
+  repeated Variable parameters = 1;
+}
 
 message Value {
   google.protobuf.Any value = 1;

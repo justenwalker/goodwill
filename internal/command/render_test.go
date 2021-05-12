@@ -15,9 +15,26 @@ func TestRenderMain(t *testing.T) {
 	g := goldie.New(t)
 	err := renderMain(&buf, ParsedData{
 		Functions: []parse.TaskFunction{
-			{Name: "Default", Doc: "Default Doc"},
-			{Name: "Task1", Doc: "Task 1 Doc"},
-			{Name: "Task2", Doc: "Task 2 Doc"},
+			{
+				Name:    "ContextFunc",
+				Doc:     "ContextFunc takes a context and a task and returns an error",
+				Context: true,
+			},
+			{
+				Name:    "ContextOutFunc",
+				Doc:     "ContextOutFunc takes a context and a task and returns output variables and an error",
+				Context: true,
+				OutVars: true,
+			},
+			{
+				Name: "Func",
+				Doc:  "Func only takes a task and returns an error",
+			},
+			{
+				Name:    "OutFunc",
+				Doc:     "OutFunc takes a task and returns output variables and an error",
+				OutVars: true,
+			},
 		},
 	})
 	if err != nil {

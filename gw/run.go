@@ -4,6 +4,7 @@
 package gw
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
@@ -31,8 +32,15 @@ const (
 	ErrNoGRPCAddr = Error("no grpc address provided")
 )
 
+var ranOnce bool
+
 // Run a function
-func Run(fn func(ts *Task) error) error {
+func Run(ctx context.Context, tr TaskRunner) error {
+	// Guard to prevent task from executing this function
+	if ranOnce {
+		return Error("Run called more than once")
+	}
+	ranOnce = true
 	var err error
 	if os.Getenv(EnvMagicKey) != EnvMagicValue {
 		return ErrNoMagicKey
@@ -59,7 +67,15 @@ func Run(fn func(ts *Task) error) error {
 		return fmt.Errorf("could not create context: %w", err)
 	}
 	defer c.Close()
-	return fn(c)
+	vars, err := tr.Run(ctx, c)
+	if err != nil {
+		return fmt.Errorf("task failed: %w", err)
+	}
+	err = c.Context().SetVariables(ctx, vars)
+	if err != nil {
+		return fmt.Errorf("failed to set output variables: %w", err)
+	}
+	return nil
 }
 
 func transportSecurity(opts []grpc.DialOption) ([]grpc.DialOption, error) {

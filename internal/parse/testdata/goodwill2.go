@@ -6,19 +6,19 @@
 package main
 
 import (
-	c2 "context"
-	"fmt"
+	"context"
+
+	// This tests that aliases work when parsing
 	gw2 "go.justen.tech/goodwill/gw"
-	"go.justen.tech/goodwill/gw/value"
+	val "go.justen.tech/goodwill/gw/value"
 )
 
-// PrintProcessID prints the concord process id
-func PrintProcessID(ts *gw2.Task) error {
-	tc := ts.Context()
-	var value value.String
-	if err := tc.Evaluate(c2.TODO(), "${txId}", &value); err != nil {
-		return err
-	}
-	fmt.Println("Process ID:", value)
+// ContextFunc takes a context and a task and returns an error
+func ContextFunc(ctx context.Context, ts *gw2.Task) error {
 	return nil
+}
+
+// ContextOutFunc takes a context and a task and returns output variables and an error
+func ContextOutFunc(ctx context.Context, ts *gw2.Task) (map[string]val.Value, error) {
+	return nil, nil
 }

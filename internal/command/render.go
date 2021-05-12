@@ -11,6 +11,11 @@ import (
 	"strings"
 )
 
+const (
+	gwPackage    = "go.justen.tech/goodwill/gw"
+	valuePackage = "go.justen.tech/goodwill/gw/value"
+)
+
 func renderMain(w io.Writer, data ParsedData) error {
 	file := NewFile("main")
 	file.HeaderComment("+build goodwill")
@@ -63,6 +68,23 @@ func renderMain(w io.Writer, data ParsedData) error {
 			jenRunTask(fn),
 			Return()))
 	}
+
+	mainCode = append(mainCode,
+		//ctx, cancel := context.WithCancel(context.Background())
+		List(Id("ctx"), Id("cancel")).Op(":=").Qual("context", "WithCancel").Call(Qual("context", "Background").Call()),
+		//defer cancel()
+		Defer().Id("cancel").Call(),
+		//sigCh := make(chan signal.Signal)
+		Id("sigCh").Op(":=").Make(Id("chan").Qual("os", "Signal")),
+		//signal.Notify(sigCh, os.Interrupt)
+		Qual("os/signal", "Notify").Call(Id("sigCh"), Qual("os", "Interrupt")),
+		//go func() {
+		Go().Func().Params().Block(
+			//	<-sigCh
+			Op("<-").Id("sigCh"),
+			//	cancel()
+			Id("cancel").Call(),
+		).Call()) //}()
 	// switch  strings.ToLower(funcName) { ... cases ... }
 	mainCode = append(mainCode, Switch(Qual("strings", "ToLower").Call(Id("funcName"))).Block(funcSwitchCases...))
 	file.Func().Id("usage").Params().Block(usageCode...)
@@ -75,7 +97,31 @@ func renderMain(w io.Writer, data ParsedData) error {
 }
 
 func jenRunTask(fn parse.TaskFunction) Code {
-	return Id("dieOnError").Call(Qual(parse.GwPackage, "Run").Call(Id(fn.Name)))
+	var block Code
+	if fn.Context {
+		// Func(ctx,ts)
+		block = Id(fn.Name).Call(Id("ctx"), Id("ts"))
+	} else {
+		// Func(ts)
+		block = Id(fn.Name).Call(Id("ts"))
+	}
+	if fn.OutVars {
+		// return Func(...)
+		block = Return(block)
+	} else {
+		// return nil, Func(...)
+		block = Return(Nil(), block)
+	}
+	// dieOnError(gw.Run(gw.TaskRunnerFunc(func(ctx context.Context, ts *gw.Task) (map[string]value.Value,error) {<block>}))
+	return Id("dieOnError").Call(Qual(gwPackage, "Run").Call(
+		Id("ctx"),
+		Qual(gwPackage, "TaskRunnerFunc").Parens(Func().Params(
+			Id("ctx").Qual("context", "Context"),
+			Id("ts").Add(Op("*")).Qual(gwPackage, "Task"),
+		).Params(
+			Map(String()).Qual(valuePackage, "Value"),
+			Id("error"),
+		).Block(block))))
 }
 
 func printlnStdErr(code ...Code) Code {

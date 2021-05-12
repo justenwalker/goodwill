@@ -13,6 +13,7 @@ import tech.justen.concord.goodwill.task.TaskParams;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -56,8 +57,8 @@ public class Task implements com.walmartlabs.concord.runtime.v2.sdk.Task {
                 executor,
                 config,
                 apiClientFactory);
-        common.execute();
-        return TaskResult.of(true);
+        Map<String, Object> result = common.execute();
+        return TaskResult.of(true).values(result);
     }
 
     private String defaultString(Variables input, String key) {

@@ -19,15 +19,19 @@ import (
 	"context"
 
 	"go.justen.tech/goodwill/gw"
+	"go.justen.tech/goodwill/gw/value"
 )
 
 // Each task is a function with the following signature
 // The function name should be capitalized
 
+// Both the ctx context.Context arg and the map[string]value.Value return are optional
+// and may be omitted from the method signature
+
 // Default Task, Says Hello
-func Default(ts *gw.Task) error {
-	_ = ts.Log(context.TODO(), "Hello, Goodwill!")
-	return nil
+func Default(ctx context.Context, ts *gw.Task) (map[string]value.Value, error) {
+	_ = ts.Log(ctx, "Hello, Goodwill!")
+	return nil, nil
 }
 ```
 

@@ -20,6 +20,8 @@ const _ = grpc.SupportPackageIsVersion7
 type ContextServiceClient interface {
 	GetVariable(ctx context.Context, in *VariableName, opts ...grpc.CallOption) (*Value, error)
 	SetVariable(ctx context.Context, in *Variable, opts ...grpc.CallOption) (*SetVariableResult, error)
+	SetVariables(ctx context.Context, in *Variables, opts ...grpc.CallOption) (*SetVariableResult, error)
+	SetTaskResult(ctx context.Context, in *Variables, opts ...grpc.CallOption) (*SetVariableResult, error)
 	GetVariableNames(ctx context.Context, in *GetVariableNameParams, opts ...grpc.CallOption) (*VariableNameList, error)
 	GetVariables(ctx context.Context, in *GetVariablesRequest, opts ...grpc.CallOption) (*MapValue, error)
 	Evaluate(ctx context.Context, in *EvaluateRequest, opts ...grpc.CallOption) (*Value, error)
@@ -45,6 +47,24 @@ func (c *contextServiceClient) GetVariable(ctx context.Context, in *VariableName
 func (c *contextServiceClient) SetVariable(ctx context.Context, in *Variable, opts ...grpc.CallOption) (*SetVariableResult, error) {
 	out := new(SetVariableResult)
 	err := c.cc.Invoke(ctx, "/context.ContextService/SetVariable", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *contextServiceClient) SetVariables(ctx context.Context, in *Variables, opts ...grpc.CallOption) (*SetVariableResult, error) {
+	out := new(SetVariableResult)
+	err := c.cc.Invoke(ctx, "/context.ContextService/SetVariables", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *contextServiceClient) SetTaskResult(ctx context.Context, in *Variables, opts ...grpc.CallOption) (*SetVariableResult, error) {
+	out := new(SetVariableResult)
+	err := c.cc.Invoke(ctx, "/context.ContextService/SetTaskResult", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +104,8 @@ func (c *contextServiceClient) Evaluate(ctx context.Context, in *EvaluateRequest
 type ContextServiceServer interface {
 	GetVariable(context.Context, *VariableName) (*Value, error)
 	SetVariable(context.Context, *Variable) (*SetVariableResult, error)
+	SetVariables(context.Context, *Variables) (*SetVariableResult, error)
+	SetTaskResult(context.Context, *Variables) (*SetVariableResult, error)
 	GetVariableNames(context.Context, *GetVariableNameParams) (*VariableNameList, error)
 	GetVariables(context.Context, *GetVariablesRequest) (*MapValue, error)
 	Evaluate(context.Context, *EvaluateRequest) (*Value, error)
@@ -99,6 +121,12 @@ func (UnimplementedContextServiceServer) GetVariable(context.Context, *VariableN
 }
 func (UnimplementedContextServiceServer) SetVariable(context.Context, *Variable) (*SetVariableResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetVariable not implemented")
+}
+func (UnimplementedContextServiceServer) SetVariables(context.Context, *Variables) (*SetVariableResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetVariables not implemented")
+}
+func (UnimplementedContextServiceServer) SetTaskResult(context.Context, *Variables) (*SetVariableResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetTaskResult not implemented")
 }
 func (UnimplementedContextServiceServer) GetVariableNames(context.Context, *GetVariableNameParams) (*VariableNameList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVariableNames not implemented")
@@ -154,6 +182,42 @@ func _ContextService_SetVariable_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ContextServiceServer).SetVariable(ctx, req.(*Variable))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ContextService_SetVariables_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Variables)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContextServiceServer).SetVariables(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/context.ContextService/SetVariables",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContextServiceServer).SetVariables(ctx, req.(*Variables))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ContextService_SetTaskResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Variables)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContextServiceServer).SetTaskResult(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/context.ContextService/SetTaskResult",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContextServiceServer).SetTaskResult(ctx, req.(*Variables))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -226,6 +290,14 @@ var ContextService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetVariable",
 			Handler:    _ContextService_SetVariable_Handler,
+		},
+		{
+			MethodName: "SetVariables",
+			Handler:    _ContextService_SetVariables_Handler,
+		},
+		{
+			MethodName: "SetTaskResult",
+			Handler:    _ContextService_SetTaskResult_Handler,
 		},
 		{
 			MethodName: "GetVariableNames",

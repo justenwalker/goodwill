@@ -138,6 +138,53 @@ func (*GetVariableNameParams) Descriptor() ([]byte, []int) {
 	return file_context_proto_rawDescGZIP(), []int{2}
 }
 
+type Variables struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Parameters []*Variable `protobuf:"bytes,1,rep,name=parameters,proto3" json:"parameters,omitempty"`
+}
+
+func (x *Variables) Reset() {
+	*x = Variables{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_context_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Variables) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Variables) ProtoMessage() {}
+
+func (x *Variables) ProtoReflect() protoreflect.Message {
+	mi := &file_context_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Variables.ProtoReflect.Descriptor instead.
+func (*Variables) Descriptor() ([]byte, []int) {
+	return file_context_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Variables) GetParameters() []*Variable {
+	if x != nil {
+		return x.Parameters
+	}
+	return nil
+}
+
 type Value struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -149,7 +196,7 @@ type Value struct {
 func (x *Value) Reset() {
 	*x = Value{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[3]
+		mi := &file_context_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -162,7 +209,7 @@ func (x *Value) String() string {
 func (*Value) ProtoMessage() {}
 
 func (x *Value) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[3]
+	mi := &file_context_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -175,7 +222,7 @@ func (x *Value) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Value.ProtoReflect.Descriptor instead.
 func (*Value) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{3}
+	return file_context_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Value) GetValue() *anypb.Any {
@@ -196,7 +243,7 @@ type MapValue struct {
 func (x *MapValue) Reset() {
 	*x = MapValue{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[4]
+		mi := &file_context_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -209,7 +256,7 @@ func (x *MapValue) String() string {
 func (*MapValue) ProtoMessage() {}
 
 func (x *MapValue) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[4]
+	mi := &file_context_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -222,7 +269,7 @@ func (x *MapValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MapValue.ProtoReflect.Descriptor instead.
 func (*MapValue) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{4}
+	return file_context_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *MapValue) GetValue() map[string]*Value {
@@ -243,7 +290,7 @@ type ListValue struct {
 func (x *ListValue) Reset() {
 	*x = ListValue{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[5]
+		mi := &file_context_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -256,7 +303,7 @@ func (x *ListValue) String() string {
 func (*ListValue) ProtoMessage() {}
 
 func (x *ListValue) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[5]
+	mi := &file_context_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -269,7 +316,7 @@ func (x *ListValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListValue.ProtoReflect.Descriptor instead.
 func (*ListValue) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{5}
+	return file_context_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListValue) GetValue() []*Value {
@@ -290,7 +337,7 @@ type StringValue struct {
 func (x *StringValue) Reset() {
 	*x = StringValue{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[6]
+		mi := &file_context_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -303,7 +350,7 @@ func (x *StringValue) String() string {
 func (*StringValue) ProtoMessage() {}
 
 func (x *StringValue) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[6]
+	mi := &file_context_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -316,7 +363,7 @@ func (x *StringValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StringValue.ProtoReflect.Descriptor instead.
 func (*StringValue) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{6}
+	return file_context_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *StringValue) GetValue() string {
@@ -337,7 +384,7 @@ type IntValue struct {
 func (x *IntValue) Reset() {
 	*x = IntValue{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[7]
+		mi := &file_context_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -350,7 +397,7 @@ func (x *IntValue) String() string {
 func (*IntValue) ProtoMessage() {}
 
 func (x *IntValue) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[7]
+	mi := &file_context_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -363,7 +410,7 @@ func (x *IntValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IntValue.ProtoReflect.Descriptor instead.
 func (*IntValue) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{7}
+	return file_context_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *IntValue) GetValue() int64 {
@@ -384,7 +431,7 @@ type DoubleValue struct {
 func (x *DoubleValue) Reset() {
 	*x = DoubleValue{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[8]
+		mi := &file_context_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -397,7 +444,7 @@ func (x *DoubleValue) String() string {
 func (*DoubleValue) ProtoMessage() {}
 
 func (x *DoubleValue) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[8]
+	mi := &file_context_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -410,7 +457,7 @@ func (x *DoubleValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DoubleValue.ProtoReflect.Descriptor instead.
 func (*DoubleValue) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{8}
+	return file_context_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *DoubleValue) GetValue() float64 {
@@ -431,7 +478,7 @@ type BoolValue struct {
 func (x *BoolValue) Reset() {
 	*x = BoolValue{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[9]
+		mi := &file_context_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -444,7 +491,7 @@ func (x *BoolValue) String() string {
 func (*BoolValue) ProtoMessage() {}
 
 func (x *BoolValue) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[9]
+	mi := &file_context_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -457,7 +504,7 @@ func (x *BoolValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BoolValue.ProtoReflect.Descriptor instead.
 func (*BoolValue) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{9}
+	return file_context_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *BoolValue) GetValue() bool {
@@ -478,7 +525,7 @@ type TimeValue struct {
 func (x *TimeValue) Reset() {
 	*x = TimeValue{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[10]
+		mi := &file_context_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -491,7 +538,7 @@ func (x *TimeValue) String() string {
 func (*TimeValue) ProtoMessage() {}
 
 func (x *TimeValue) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[10]
+	mi := &file_context_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -504,7 +551,7 @@ func (x *TimeValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TimeValue.ProtoReflect.Descriptor instead.
 func (*TimeValue) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{10}
+	return file_context_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *TimeValue) GetValue() int64 {
@@ -523,7 +570,7 @@ type NullValue struct {
 func (x *NullValue) Reset() {
 	*x = NullValue{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[11]
+		mi := &file_context_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -536,7 +583,7 @@ func (x *NullValue) String() string {
 func (*NullValue) ProtoMessage() {}
 
 func (x *NullValue) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[11]
+	mi := &file_context_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -549,7 +596,7 @@ func (x *NullValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NullValue.ProtoReflect.Descriptor instead.
 func (*NullValue) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{11}
+	return file_context_proto_rawDescGZIP(), []int{12}
 }
 
 type JSONValue struct {
@@ -564,7 +611,7 @@ type JSONValue struct {
 func (x *JSONValue) Reset() {
 	*x = JSONValue{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[12]
+		mi := &file_context_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -577,7 +624,7 @@ func (x *JSONValue) String() string {
 func (*JSONValue) ProtoMessage() {}
 
 func (x *JSONValue) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[12]
+	mi := &file_context_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -590,7 +637,7 @@ func (x *JSONValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JSONValue.ProtoReflect.Descriptor instead.
 func (*JSONValue) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{12}
+	return file_context_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *JSONValue) GetClass() string {
@@ -620,7 +667,7 @@ type EvaluateRequest struct {
 func (x *EvaluateRequest) Reset() {
 	*x = EvaluateRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[13]
+		mi := &file_context_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -633,7 +680,7 @@ func (x *EvaluateRequest) String() string {
 func (*EvaluateRequest) ProtoMessage() {}
 
 func (x *EvaluateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[13]
+	mi := &file_context_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -646,7 +693,7 @@ func (x *EvaluateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EvaluateRequest.ProtoReflect.Descriptor instead.
 func (*EvaluateRequest) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{13}
+	return file_context_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *EvaluateRequest) GetExpression() string {
@@ -681,7 +728,7 @@ type VariableName struct {
 func (x *VariableName) Reset() {
 	*x = VariableName{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[14]
+		mi := &file_context_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -694,7 +741,7 @@ func (x *VariableName) String() string {
 func (*VariableName) ProtoMessage() {}
 
 func (x *VariableName) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[14]
+	mi := &file_context_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -707,7 +754,7 @@ func (x *VariableName) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VariableName.ProtoReflect.Descriptor instead.
 func (*VariableName) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{14}
+	return file_context_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *VariableName) GetName() string {
@@ -728,7 +775,7 @@ type VariableNameList struct {
 func (x *VariableNameList) Reset() {
 	*x = VariableNameList{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[15]
+		mi := &file_context_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -741,7 +788,7 @@ func (x *VariableNameList) String() string {
 func (*VariableNameList) ProtoMessage() {}
 
 func (x *VariableNameList) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[15]
+	mi := &file_context_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -754,7 +801,7 @@ func (x *VariableNameList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VariableNameList.ProtoReflect.Descriptor instead.
 func (*VariableNameList) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{15}
+	return file_context_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *VariableNameList) GetName() []string {
@@ -776,7 +823,7 @@ type Variable struct {
 func (x *Variable) Reset() {
 	*x = Variable{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_context_proto_msgTypes[16]
+		mi := &file_context_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -789,7 +836,7 @@ func (x *Variable) String() string {
 func (*Variable) ProtoMessage() {}
 
 func (x *Variable) ProtoReflect() protoreflect.Message {
-	mi := &file_context_proto_msgTypes[16]
+	mi := &file_context_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -802,7 +849,7 @@ func (x *Variable) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Variable.ProtoReflect.Descriptor instead.
 func (*Variable) Descriptor() ([]byte, []int) {
-	return file_context_proto_rawDescGZIP(), []int{16}
+	return file_context_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *Variable) GetName() string {
@@ -829,7 +876,11 @@ var file_context_proto_rawDesc = []byte{
 	0x6c, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x13, 0x0a, 0x11, 0x53, 0x65,
 	0x74, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22,
 	0x17, 0x0a, 0x15, 0x47, 0x65, 0x74, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x4e, 0x61,
-	0x6d, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x22, 0x33, 0x0a, 0x05, 0x56, 0x61, 0x6c, 0x75,
+	0x6d, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x22, 0x3e, 0x0a, 0x09, 0x56, 0x61, 0x72, 0x69,
+	0x61, 0x62, 0x6c, 0x65, 0x73, 0x12, 0x31, 0x0a, 0x0a, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x65, 0x74,
+	0x65, 0x72, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x63, 0x6f, 0x6e, 0x74,
+	0x65, 0x78, 0x74, 0x2e, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x0a, 0x70, 0x61,
+	0x72, 0x61, 0x6d, 0x65, 0x74, 0x65, 0x72, 0x73, 0x22, 0x33, 0x0a, 0x05, 0x56, 0x61, 0x6c, 0x75,
 	0x65, 0x12, 0x2a, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
 	0x32, 0x14, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
 	0x75, 0x66, 0x2e, 0x41, 0x6e, 0x79, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x88, 0x01,
@@ -876,7 +927,7 @@ var file_context_proto_rawDesc = []byte{
 	0x62, 0x6c, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x24, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65,
 	0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74,
-	0x2e, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x32, 0xd4, 0x02,
+	0x2e, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x32, 0xd9, 0x03,
 	0x0a, 0x0e, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
 	0x12, 0x36, 0x0a, 0x0b, 0x47, 0x65, 0x74, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x12,
 	0x15, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x2e, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62,
@@ -885,26 +936,34 @@ var file_context_proto_rawDesc = []byte{
 	0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x12, 0x11, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78,
 	0x74, 0x2e, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x1a, 0x1a, 0x2e, 0x63, 0x6f, 0x6e,
 	0x74, 0x65, 0x78, 0x74, 0x2e, 0x53, 0x65, 0x74, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65,
-	0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x4f, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x56,
-	0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x73, 0x12, 0x1e, 0x2e, 0x63,
-	0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x2e, 0x47, 0x65, 0x74, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62,
-	0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x1a, 0x19, 0x2e, 0x63,
-	0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x2e, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x4e,
-	0x61, 0x6d, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x22, 0x00, 0x12, 0x41, 0x0a, 0x0c, 0x47, 0x65, 0x74,
-	0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x73, 0x12, 0x1c, 0x2e, 0x63, 0x6f, 0x6e, 0x74,
-	0x65, 0x78, 0x74, 0x2e, 0x47, 0x65, 0x74, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x73,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x11, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78,
-	0x74, 0x2e, 0x4d, 0x61, 0x70, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x00, 0x12, 0x36, 0x0a, 0x08,
-	0x45, 0x76, 0x61, 0x6c, 0x75, 0x61, 0x74, 0x65, 0x12, 0x18, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x65,
-	0x78, 0x74, 0x2e, 0x45, 0x76, 0x61, 0x6c, 0x75, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x1a, 0x0e, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x2e, 0x56, 0x61, 0x6c,
-	0x75, 0x65, 0x22, 0x00, 0x42, 0x56, 0x0a, 0x21, 0x74, 0x65, 0x63, 0x68, 0x2e, 0x6a, 0x75, 0x73,
-	0x74, 0x65, 0x6e, 0x2e, 0x63, 0x6f, 0x6e, 0x63, 0x6f, 0x72, 0x64, 0x2e, 0x67, 0x6f, 0x6f, 0x64,
-	0x77, 0x69, 0x6c, 0x6c, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x42, 0x0c, 0x43, 0x6f, 0x6e, 0x74, 0x65,
-	0x78, 0x74, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x5a, 0x23, 0x67, 0x6f, 0x2e, 0x6a, 0x75, 0x73, 0x74,
-	0x65, 0x6e, 0x2e, 0x74, 0x65, 0x63, 0x68, 0x2f, 0x67, 0x6f, 0x6f, 0x64, 0x77, 0x69, 0x6c, 0x6c,
-	0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x40, 0x0a, 0x0c, 0x53, 0x65, 0x74, 0x56,
+	0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x73, 0x12, 0x12, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x65,
+	0x78, 0x74, 0x2e, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x73, 0x1a, 0x1a, 0x2e, 0x63,
+	0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x2e, 0x53, 0x65, 0x74, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62,
+	0x6c, 0x65, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x41, 0x0a, 0x0d, 0x53, 0x65,
+	0x74, 0x54, 0x61, 0x73, 0x6b, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x12, 0x2e, 0x63, 0x6f,
+	0x6e, 0x74, 0x65, 0x78, 0x74, 0x2e, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x73, 0x1a,
+	0x1a, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x2e, 0x53, 0x65, 0x74, 0x56, 0x61, 0x72,
+	0x69, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x4f, 0x0a,
+	0x10, 0x47, 0x65, 0x74, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65,
+	0x73, 0x12, 0x1e, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x2e, 0x47, 0x65, 0x74, 0x56,
+	0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x50, 0x61, 0x72, 0x61, 0x6d,
+	0x73, 0x1a, 0x19, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x2e, 0x56, 0x61, 0x72, 0x69,
+	0x61, 0x62, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x22, 0x00, 0x12, 0x41,
+	0x0a, 0x0c, 0x47, 0x65, 0x74, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x73, 0x12, 0x1c,
+	0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x2e, 0x47, 0x65, 0x74, 0x56, 0x61, 0x72, 0x69,
+	0x61, 0x62, 0x6c, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x11, 0x2e, 0x63,
+	0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x2e, 0x4d, 0x61, 0x70, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x22,
+	0x00, 0x12, 0x36, 0x0a, 0x08, 0x45, 0x76, 0x61, 0x6c, 0x75, 0x61, 0x74, 0x65, 0x12, 0x18, 0x2e,
+	0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x2e, 0x45, 0x76, 0x61, 0x6c, 0x75, 0x61, 0x74, 0x65,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e, 0x2e, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78,
+	0x74, 0x2e, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x00, 0x42, 0x56, 0x0a, 0x21, 0x74, 0x65, 0x63,
+	0x68, 0x2e, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x6e, 0x2e, 0x63, 0x6f, 0x6e, 0x63, 0x6f, 0x72, 0x64,
+	0x2e, 0x67, 0x6f, 0x6f, 0x64, 0x77, 0x69, 0x6c, 0x6c, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x42, 0x0c,
+	0x43, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x5a, 0x23, 0x67, 0x6f,
+	0x2e, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x6e, 0x2e, 0x74, 0x65, 0x63, 0x68, 0x2f, 0x67, 0x6f, 0x6f,
+	0x64, 0x77, 0x69, 0x6c, 0x6c, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x70,
+	0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -919,50 +978,56 @@ func file_context_proto_rawDescGZIP() []byte {
 	return file_context_proto_rawDescData
 }
 
-var file_context_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_context_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_context_proto_goTypes = []interface{}{
 	(*GetVariablesRequest)(nil),   // 0: context.GetVariablesRequest
 	(*SetVariableResult)(nil),     // 1: context.SetVariableResult
 	(*GetVariableNameParams)(nil), // 2: context.GetVariableNameParams
-	(*Value)(nil),                 // 3: context.Value
-	(*MapValue)(nil),              // 4: context.MapValue
-	(*ListValue)(nil),             // 5: context.ListValue
-	(*StringValue)(nil),           // 6: context.StringValue
-	(*IntValue)(nil),              // 7: context.IntValue
-	(*DoubleValue)(nil),           // 8: context.DoubleValue
-	(*BoolValue)(nil),             // 9: context.BoolValue
-	(*TimeValue)(nil),             // 10: context.TimeValue
-	(*NullValue)(nil),             // 11: context.NullValue
-	(*JSONValue)(nil),             // 12: context.JSONValue
-	(*EvaluateRequest)(nil),       // 13: context.EvaluateRequest
-	(*VariableName)(nil),          // 14: context.VariableName
-	(*VariableNameList)(nil),      // 15: context.VariableNameList
-	(*Variable)(nil),              // 16: context.Variable
-	nil,                           // 17: context.MapValue.ValueEntry
-	(*anypb.Any)(nil),             // 18: google.protobuf.Any
+	(*Variables)(nil),             // 3: context.Variables
+	(*Value)(nil),                 // 4: context.Value
+	(*MapValue)(nil),              // 5: context.MapValue
+	(*ListValue)(nil),             // 6: context.ListValue
+	(*StringValue)(nil),           // 7: context.StringValue
+	(*IntValue)(nil),              // 8: context.IntValue
+	(*DoubleValue)(nil),           // 9: context.DoubleValue
+	(*BoolValue)(nil),             // 10: context.BoolValue
+	(*TimeValue)(nil),             // 11: context.TimeValue
+	(*NullValue)(nil),             // 12: context.NullValue
+	(*JSONValue)(nil),             // 13: context.JSONValue
+	(*EvaluateRequest)(nil),       // 14: context.EvaluateRequest
+	(*VariableName)(nil),          // 15: context.VariableName
+	(*VariableNameList)(nil),      // 16: context.VariableNameList
+	(*Variable)(nil),              // 17: context.Variable
+	nil,                           // 18: context.MapValue.ValueEntry
+	(*anypb.Any)(nil),             // 19: google.protobuf.Any
 }
 var file_context_proto_depIdxs = []int32{
-	18, // 0: context.Value.value:type_name -> google.protobuf.Any
-	17, // 1: context.MapValue.value:type_name -> context.MapValue.ValueEntry
-	3,  // 2: context.ListValue.value:type_name -> context.Value
-	16, // 3: context.EvaluateRequest.parameters:type_name -> context.Variable
-	3,  // 4: context.Variable.value:type_name -> context.Value
-	3,  // 5: context.MapValue.ValueEntry.value:type_name -> context.Value
-	14, // 6: context.ContextService.GetVariable:input_type -> context.VariableName
-	16, // 7: context.ContextService.SetVariable:input_type -> context.Variable
-	2,  // 8: context.ContextService.GetVariableNames:input_type -> context.GetVariableNameParams
-	0,  // 9: context.ContextService.GetVariables:input_type -> context.GetVariablesRequest
-	13, // 10: context.ContextService.Evaluate:input_type -> context.EvaluateRequest
-	3,  // 11: context.ContextService.GetVariable:output_type -> context.Value
-	1,  // 12: context.ContextService.SetVariable:output_type -> context.SetVariableResult
-	15, // 13: context.ContextService.GetVariableNames:output_type -> context.VariableNameList
-	4,  // 14: context.ContextService.GetVariables:output_type -> context.MapValue
-	3,  // 15: context.ContextService.Evaluate:output_type -> context.Value
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	17, // 0: context.Variables.parameters:type_name -> context.Variable
+	19, // 1: context.Value.value:type_name -> google.protobuf.Any
+	18, // 2: context.MapValue.value:type_name -> context.MapValue.ValueEntry
+	4,  // 3: context.ListValue.value:type_name -> context.Value
+	17, // 4: context.EvaluateRequest.parameters:type_name -> context.Variable
+	4,  // 5: context.Variable.value:type_name -> context.Value
+	4,  // 6: context.MapValue.ValueEntry.value:type_name -> context.Value
+	15, // 7: context.ContextService.GetVariable:input_type -> context.VariableName
+	17, // 8: context.ContextService.SetVariable:input_type -> context.Variable
+	3,  // 9: context.ContextService.SetVariables:input_type -> context.Variables
+	3,  // 10: context.ContextService.SetTaskResult:input_type -> context.Variables
+	2,  // 11: context.ContextService.GetVariableNames:input_type -> context.GetVariableNameParams
+	0,  // 12: context.ContextService.GetVariables:input_type -> context.GetVariablesRequest
+	14, // 13: context.ContextService.Evaluate:input_type -> context.EvaluateRequest
+	4,  // 14: context.ContextService.GetVariable:output_type -> context.Value
+	1,  // 15: context.ContextService.SetVariable:output_type -> context.SetVariableResult
+	1,  // 16: context.ContextService.SetVariables:output_type -> context.SetVariableResult
+	1,  // 17: context.ContextService.SetTaskResult:output_type -> context.SetVariableResult
+	16, // 18: context.ContextService.GetVariableNames:output_type -> context.VariableNameList
+	5,  // 19: context.ContextService.GetVariables:output_type -> context.MapValue
+	4,  // 20: context.ContextService.Evaluate:output_type -> context.Value
+	14, // [14:21] is the sub-list for method output_type
+	7,  // [7:14] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_context_proto_init() }
@@ -1008,7 +1073,7 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Value); i {
+			switch v := v.(*Variables); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1020,7 +1085,7 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MapValue); i {
+			switch v := v.(*Value); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1032,7 +1097,7 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListValue); i {
+			switch v := v.(*MapValue); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1044,7 +1109,7 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StringValue); i {
+			switch v := v.(*ListValue); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1056,7 +1121,7 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IntValue); i {
+			switch v := v.(*StringValue); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1068,7 +1133,7 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DoubleValue); i {
+			switch v := v.(*IntValue); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1080,7 +1145,7 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BoolValue); i {
+			switch v := v.(*DoubleValue); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1092,7 +1157,7 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TimeValue); i {
+			switch v := v.(*BoolValue); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1104,7 +1169,7 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*NullValue); i {
+			switch v := v.(*TimeValue); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1116,7 +1181,7 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*JSONValue); i {
+			switch v := v.(*NullValue); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1128,7 +1193,7 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*EvaluateRequest); i {
+			switch v := v.(*JSONValue); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1140,7 +1205,7 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*VariableName); i {
+			switch v := v.(*EvaluateRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1152,7 +1217,7 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*VariableNameList); i {
+			switch v := v.(*VariableName); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1164,6 +1229,18 @@ func file_context_proto_init() {
 			}
 		}
 		file_context_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*VariableNameList); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_context_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Variable); i {
 			case 0:
 				return &v.state
@@ -1182,7 +1259,7 @@ func file_context_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_context_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -10,18 +10,18 @@ import tech.justen.concord.goodwill.ContextService;
 import tech.justen.concord.goodwill.grpc.ContextProto.*;
 import tech.justen.concord.goodwill.grpc.ContextServiceGrpc;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GrpcContextService extends ContextServiceGrpc.ContextServiceImplBase {
     private static final Logger log = LoggerFactory.getLogger(GrpcContextService.class);
 
     private final ContextService executionService;
 
-    public GrpcContextService(ContextService executionService) {
+    private final Map<String, Object> taskResultMap;
+
+    public GrpcContextService(ContextService executionService, Map<String, Object> result) {
         this.executionService = executionService;
+        this.taskResultMap = result;
     }
 
     @Override
@@ -48,6 +48,40 @@ public class GrpcContextService extends ContextServiceGrpc.ContextServiceImplBas
             log.error("GrpcExecutionService: setVariable failed", ex);
             responseObserver.onError(GrpcUtils.toStatusException(ex));
         }
+    }
+
+    @Override
+    public void setVariables(Variables request, StreamObserver<SetVariableResult> responseObserver) {
+        for (Variable var : request.getParametersList()) {
+            String name = var.getName();
+            try {
+                Object obj = GrpcUtils.fromAny(var.getValue().getValue());
+                this.executionService.setVariable(name, obj);
+            } catch (Exception ex) {
+                log.error(String.format("GrpcExecutionService: setVariables %s failed", name), ex);
+                responseObserver.onError(GrpcUtils.toStatusException(ex));
+                return;
+            }
+        }
+        responseObserver.onNext(SetVariableResult.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void setTaskResult(Variables request, StreamObserver<SetVariableResult> responseObserver) {
+        for (Variable var : request.getParametersList()) {
+            String name = var.getName();
+            try {
+                Object obj = GrpcUtils.fromAny(var.getValue().getValue());
+                this.taskResultMap.put(name, obj);
+            } catch (Exception ex) {
+                log.error(String.format("GrpcExecutionService: setTaskResult %s failed", name), ex);
+                responseObserver.onError(GrpcUtils.toStatusException(ex));
+                return;
+            }
+        }
+        responseObserver.onNext(SetVariableResult.newBuilder().build());
+        responseObserver.onCompleted();
     }
 
     @Override

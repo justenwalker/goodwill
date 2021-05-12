@@ -3,9 +3,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	gw "go.justen.tech/goodwill/gw"
+	value "go.justen.tech/goodwill/gw/value"
 	"os"
+	"os/signal"
 	"strings"
 )
 
@@ -18,9 +21,10 @@ func dieOnError(err error) {
 func usage() {
 	fmt.Printf("Usage: %s FUNCTION\n", os.Args[0])
 	fmt.Println("Functions:")
-	fmt.Println("\tDefault\tDefault Doc")
-	fmt.Println("\tTask1\tTask 1 Doc")
-	fmt.Println("\tTask2\tTask 2 Doc")
+	fmt.Println("\tContextFunc\tContextFunc takes a context and a task and returns an error")
+	fmt.Println("\tContextOutFunc\tContextOutFunc takes a context and a task and returns output variables and an error")
+	fmt.Println("\tFunc\tFunc only takes a task and returns an error")
+	fmt.Println("\tOutFunc\tOutFunc takes a task and returns output variables and an error")
 	os.Exit(128)
 }
 func main() {
@@ -29,15 +33,34 @@ func main() {
 		usage()
 	}
 	funcName := os.Args[1]
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	sigCh := make(chan os.Signal)
+	signal.Notify(sigCh, os.Interrupt)
+	go func() {
+		<-sigCh
+		cancel()
+	}()
 	switch strings.ToLower(funcName) {
-	case "default":
-		dieOnError(gw.Run(Default))
+	case "contextfunc":
+		dieOnError(gw.Run(ctx, gw.TaskRunnerFunc(func(ctx context.Context, ts *gw.Task) (map[string]value.Value, error) {
+			return nil, ContextFunc(ctx, ts)
+		})))
 		return
-	case "task1":
-		dieOnError(gw.Run(Task1))
+	case "contextoutfunc":
+		dieOnError(gw.Run(ctx, gw.TaskRunnerFunc(func(ctx context.Context, ts *gw.Task) (map[string]value.Value, error) {
+			return ContextOutFunc(ctx, ts)
+		})))
 		return
-	case "task2":
-		dieOnError(gw.Run(Task2))
+	case "func":
+		dieOnError(gw.Run(ctx, gw.TaskRunnerFunc(func(ctx context.Context, ts *gw.Task) (map[string]value.Value, error) {
+			return nil, Func(ts)
+		})))
+		return
+	case "outfunc":
+		dieOnError(gw.Run(ctx, gw.TaskRunnerFunc(func(ctx context.Context, ts *gw.Task) (map[string]value.Value, error) {
+			return OutFunc(ts)
+		})))
 		return
 	}
 	fmt.Fprintln(os.Stderr, "Unknown function name:", funcName)

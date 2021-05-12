@@ -71,7 +71,10 @@ public class Task implements com.walmartlabs.concord.sdk.Task {
                 executor,
                 config,
                 apiClientFactory);
-        common.execute();
+        Map<String, Object> result = common.execute();
+        for (Map.Entry<String, Object> e : result.entrySet()) {
+            ctx.setVariable(e.getKey(), e.getValue());
+        }
     }
 
     private String defaultString(Context ctx, String key) {

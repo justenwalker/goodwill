@@ -31,6 +31,22 @@ func (c *Service) SetVariable(ctx context.Context, name string, value value.Valu
 	return err
 }
 
+func (c *Service) SetVariables(ctx context.Context, vars map[string]value.Value) error {
+	if len(vars) == 0 {
+		return nil
+	}
+	var variables pb.Variables
+	for key, val := range vars {
+		variable, err := newVariable(key, val)
+		if err != nil {
+			return fmt.Errorf("make variable %q=%v failed: %w", key, val, err)
+		}
+		variables.Parameters = append(variables.Parameters, variable)
+	}
+	_, err := c.client.SetVariables(ctx, &variables)
+	return err
+}
+
 // GetVariable gets the tasks variable to the given value
 func (c *Service) GetVariable(ctx context.Context, name string, out value.ValueOut) error {
 	v, err := c.client.GetVariable(ctx, &pb.VariableName{Name: name})
@@ -69,7 +85,7 @@ func (c *Service) GetVariables(ctx context.Context) (map[string]interface{}, err
 // EvaluateParams evaluates the given expression, and returns the result into the output value.
 // The given map of parameters are set as variables before the expression is evaluated,
 // which approximates a parameterized query; allowing a safer expression evaluation compared to string concatenation.
-func (c *Service) EvaluateParams(ctx context.Context, expr string, out value.ValueOut, params map[string]value.Value, ) error {
+func (c *Service) EvaluateParams(ctx context.Context, expr string, out value.ValueOut, params map[string]value.Value) error {
 	var parameters []*pb.Variable
 	for key, val := range params {
 		mv, err := value.Marshal(val)

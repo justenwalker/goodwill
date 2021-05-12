@@ -18,9 +18,7 @@ import (
 )
 
 // Default is a flow that prints the working directory
-func Default(ts *gw.Task) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*2)
-	defer cancel()
+func Default(ctx context.Context, ts *gw.Task) error {
 	fmt.Println("====== Get Task Config")
 	cfg, err := ts.Config().Configuration(ctx)
 	if err != nil {
@@ -32,38 +30,39 @@ func Default(ts *gw.Task) error {
 }
 
 // SetVariables gets and sets variables
-func SetVariables(ts *gw.Task) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*2)
-	defer cancel()
-	var value value.Time
+func SetVariables(ctx context.Context, ts *gw.Task) (map[string]value.Value, error) {
+	var t value.Time
 	tc := ts.Context()
 	fmt.Println("====== Evaluate Expression")
-	if err := tc.Evaluate(ctx, "${datetime.current()}", &value); err != nil {
-		return fmt.Errorf("evaluate expression failed: %w", err)
+	if err := tc.Evaluate(ctx, "${datetime.current()}", &t); err != nil {
+		return nil, fmt.Errorf("evaluate expression failed: %w", err)
 	}
-	fmt.Printf("datetime.current: %v\n", value.Format(time.RFC3339Nano))
+	fmt.Printf("datetime.current: %v\n", t.Format(time.RFC3339Nano))
 
 	fmt.Println("====== Set/Get Variables")
-	fmt.Println("Set timeStamp:", value)
-	if err := tc.SetVariable(ctx, "timeStamp", value); err != nil {
-		return fmt.Errorf("set timeStamp var failed: %w", err)
+	fmt.Println("Set timeStamp:", t)
+	if err := tc.SetVariable(ctx, "timeStamp", t); err != nil {
+		return nil, fmt.Errorf("set timeStamp var failed: %w", err)
 	}
 	fmt.Println("Get timeStamp")
-	if err := tc.GetVariable(ctx, "timeStamp", &value); err != nil {
-		return fmt.Errorf("get timeStamp var failed: %w", err)
+	if err := tc.GetVariable(ctx, "timeStamp", &t); err != nil {
+		return nil, fmt.Errorf("get timeStamp var failed: %w", err)
 	}
-	fmt.Printf("timeStamp: %v\n", value.Format(time.RFC3339Nano))
+	fmt.Printf("timeStamp: %v\n", t.Format(time.RFC3339Nano))
 
 	fmt.Println("====== Dump Variables")
 	vars, err := tc.GetVariables(ctx)
 	if err != nil {
-		return fmt.Errorf("ger variables failed: %w", err)
+		return nil, fmt.Errorf("ger variables failed: %w", err)
 	}
 	fmt.Println("Variables:")
 	for k, v := range vars {
 		fmt.Println(k, "=", v)
 	}
-	return nil
+	return map[string]value.Value{
+		"foo": value.String("bar"),
+		"baz": value.Int64(1000),
+	}, nil
 }
 
 // Crypto does crypto operations on secrets
