@@ -107,8 +107,18 @@ func PackageJAR() error {
 
 // Build and package distribution files
 func Package() error {
+	if err := sh.RunV("mvn", "clean"); err != nil {
+		return err
+	}
 	mg.SerialDeps(Dependencies, Generate, PackageJAR, sha256Sums)
 	return nil
+}
+
+// Deploy to maven central
+func Deploy() error {
+	mg.Deps(Package)
+	debug.Println("==> release to maven")
+	return sh.RunV("mvn", "deploy", "-P", "release")
 }
 
 func Sign() error {
@@ -255,6 +265,11 @@ func Release() error {
 		return err
 	}
 	mg.SerialDeps(PackageJAR, sha256Sums)
+	return nil
+}
+
+func ReleaseBins() error {
+	mg.SerialDeps(Dependencies, Generate, PackageJAR, sha256Sums, Sign)
 	return nil
 }
 
