@@ -2,6 +2,7 @@
 /files/concord.conf
 /files/concord-server.conf
 /files/concord-agent.conf
+/files/maven.json
 /files/bootstrap.ldif
 *.lock.hcl
 *.lock.info
