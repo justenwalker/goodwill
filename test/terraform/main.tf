@@ -6,11 +6,15 @@
 locals {
   agent_volume_name = "concord-agent-data"
   template_vars = {
-    pg_password         = var.pg_password,
-    ldap_org            = var.ldap_org,
-    ldap_domain         = var.ldap_domain,
-    ldap_base_dn        = var.ldap_base_dn,
-    ldap_admin_password = var.ldap_admin_password,
+    pg_password           = var.pg_password,
+    ldap_org              = var.ldap_org,
+    ldap_domain           = var.ldap_domain,
+    ldap_base_dn          = var.ldap_base_dn,
+    ldap_admin_password   = var.ldap_admin_password,
+    concord_api_key       = var.concord_api_key,
+    sonatype_username     = var.sonatype_username,
+    sonatype_password     = var.sonatype_password,
+    sonatype_staging_repo = var.sonatype_staging_repo,
   }
 }
 

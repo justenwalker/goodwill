@@ -13,19 +13,21 @@ import (
 )
 
 type flags struct {
-	GoCmd    string
-	OS       string
-	Arch     string
-	GoFlags  []string
-	goFlags  string
-	Debug    bool
-	Dir      string
-	Output   string
+	GoCmd   string
+	OS      string
+	Arch    string
+	GoFlags []string
+	goFlags string
+	Debug   bool
+	Dir     string
+	Output  string
+	Version bool
 }
 
 func (f *flags) Parse() bool {
 	fs := flag.NewFlagSet("", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
+	fs.BoolVar(&f.Version, "version", false, "print version information")
 	fs.StringVar(&f.Output, "out", "goodwill.tasks", "the output binary")
 	fs.StringVar(&f.Dir, "dir", ".", "the directory containing the goodwill source")
 	fs.StringVar(&f.OS, "os", runtime.GOOS, "set the GOOS")

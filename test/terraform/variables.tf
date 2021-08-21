@@ -19,6 +19,19 @@ variable "ldap_admin_password" {
   type    = string
   default = "admin"
 }
+variable "concord_api_key" {
+  type    = string
+  default = ""
+}
+variable "sonatype_username" {
+  type = string
+}
+variable "sonatype_password" {
+  type = string
+}
+variable "sonatype_staging_repo" {
+  type = string
+}
 variable "pg_password" {
   type    = string
   default = "q1q1q1q1"
@@ -33,7 +46,7 @@ variable "ipv6_cidr" {
 }
 variable "concord_version" {
   type    = string
-  default = "1.84.0"
+  default = "1.88.0"
 }
 variable "goprivate" {
   type    = string
