@@ -126,7 +126,7 @@ public class TaskParams {
 
     public String getTasksBinary() {
         if (tasksBinary == null || tasksBinary.isEmpty()) {
-            if (getGoOS() == "windows") {
+            if (getGoOS().equals("windows")) {
                 return DEFAULT_BIN_EXE;
             }
             return DEFAULT_BIN;
