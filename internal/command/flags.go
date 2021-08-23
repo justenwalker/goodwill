@@ -102,6 +102,5 @@ func splitArgs(str string) []string {
 	if arglen > 0 {
 		args = append(args, buf.String())
 	}
-	arglen = 0
 	return args
 }
