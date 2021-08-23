@@ -11,7 +11,7 @@ import (
 
 type Int64 int64
 
-func (v Int64)  Type() string {
+func (v Int64) Type() string {
 	return "int64"
 }
 

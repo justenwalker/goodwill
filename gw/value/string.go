@@ -11,7 +11,7 @@ import (
 
 type String string
 
-func (v String)  Type() string {
+func (v String) Type() string {
 	return "string"
 }
 

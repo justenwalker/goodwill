@@ -13,7 +13,7 @@ const Discard = nullOut(0)
 
 type nullOut int
 
-func (n nullOut)  Type() string {
+func (n nullOut) Type() string {
 	return "null"
 }
 
