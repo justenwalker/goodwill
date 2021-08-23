@@ -6,11 +6,9 @@ package gw
 import (
 	"context"
 	"fmt"
-	"go.justen.tech/goodwill/gw/jsonstore"
-	"go.justen.tech/goodwill/internal/pb"
-
 	"go.justen.tech/goodwill/gw/config"
 	"go.justen.tech/goodwill/gw/docker"
+	"go.justen.tech/goodwill/gw/jsonstore"
 	"go.justen.tech/goodwill/gw/kv"
 	"go.justen.tech/goodwill/gw/lock"
 	"go.justen.tech/goodwill/gw/secret"
@@ -108,33 +106,6 @@ func (c *Task) KV() *kv.Service {
 	return kv.NewService(c.conn)
 }
 
-func (c *Task) setResult(ctx context.Context, vars map[string]value.Value) error {
-	if len(vars) == 0 {
-		return nil
-	}
-	var variables pb.Variables
-	for key, val := range vars {
-		variable, err := newVariable(key, val)
-		if err != nil {
-			return fmt.Errorf("set result variable %q=%v failed: %w", key, val, err)
-		}
-		variables.Parameters = append(variables.Parameters, variable)
-	}
-	_, err := pb.NewContextServiceClient(c.conn).SetTaskResult(ctx, &variables)
-	return err
-}
-
 func (c *Task) Close() error {
 	return c.conn.Close()
-}
-
-func newVariable(key string, val value.Value) (*pb.Variable, error) {
-	v, err := value.Marshal(val)
-	if err != nil {
-		return nil, err
-	}
-	return &pb.Variable{
-		Name:  key,
-		Value: v,
-	}, nil
 }
