@@ -69,6 +69,9 @@ var (
 	gitCommit = mage.StringOnce(func() (string, error) {
 		return sh.Output("git", "rev-parse", "HEAD")
 	})
+	buildTime = mage.StringOnce(func() (string, error) {
+		return time.Now().UTC().Format(time.RFC3339), nil
+	})
 	sumFile = mage.StringOnce(func() (string, error) {
 		version := version()
 		return filepath.Join(distDir(), fmt.Sprintf("goodwill_%s_SHA256SUMS", version)), nil
@@ -82,6 +85,15 @@ var (
 	})
 	concordData = mage.LoadOnce(filepath.Join(terraformDir, "concord-env.json"))
 )
+
+func mvn(args ...string) error {
+	args = append(args,
+		fmt.Sprintf("-Dbuild.version=%s", version()),
+		fmt.Sprintf("-Dbuild.gitCommit=%s", gitCommit()),
+		fmt.Sprintf("-Dbuild.timestamp=%s", buildTime()),
+	)
+	return sh.RunV("mvn", args...)
+}
 
 var debug = log.New(os.Stderr, "", 0)
 
@@ -133,7 +145,7 @@ func UberJAR() error {
 	}
 	mg.SerialDeps(buildAllGoBinaries, copyGoBinaries)
 	debug.Println("==> package task")
-	err := sh.RunV("mvn", "package", "-P", "package")
+	err := mvn("package", "-P", "package")
 	if err != nil {
 		return err
 	}
@@ -157,7 +169,7 @@ func Package() error {
 	if os.Getenv("SIGNIFY_KEY") == "" {
 		return fmt.Errorf("SIGNIFY_KEY not set")
 	}
-	if err := sh.RunV("mvn", "clean"); err != nil {
+	if err := mvn("clean"); err != nil {
 		return err
 	}
 	mg.SerialDeps(Clean, Build, writeSums, sign, verify)
@@ -168,7 +180,7 @@ func Package() error {
 func Deploy() error {
 	mg.Deps(Package)
 	debug.Println("==> deploy to maven central")
-	return sh.RunV("mvn", "deploy", "-P", "release")
+	return mvn("deploy", "-P", "release")
 }
 
 func sign() error {
@@ -213,7 +225,7 @@ func GenerateGo() error {
 // GenerateJava generates java sources
 func GenerateJava() error {
 	debug.Println("==> generate java code")
-	return sh.RunV("mvn", "generate-sources")
+	return mvn( "generate-sources")
 }
 
 var lockGoBinaries sync.Mutex
@@ -226,15 +238,15 @@ func addGoBinary(artifact mage.Artifact) {
 }
 
 // buildGoBinary builds a Go binary forthe target os/arch
-func buildGoBinary(distDir string, bt string, os string, arch string) error {
-	t, err := time.Parse(time.RFC3339, bt)
+func buildGoBinary(distDir string, os string, arch string) error {
+	t, err := time.Parse(time.RFC3339, buildTime())
 	if err != nil {
 		return err
 	}
 	artifact, err := mage.BuildTarget(distDir, t, mage.Build{
 		Version:   version(),
 		GitCommit: gitCommit(),
-		BuildTime: bt,
+		BuildTime: buildTime(),
 	}, mage.Target{
 		OS:   os,
 		Arch: arch,
@@ -248,7 +260,7 @@ func buildGoBinary(distDir string, bt string, os string, arch string) error {
 
 // buildAllGoBinaries builds Go binaries for all supported os/arch targets
 func buildAllGoBinaries() error {
-	t := time.Now().UTC().Format(time.RFC3339)
+
 	var deps []interface{}
 	for _, target := range []struct {
 		OS   string
@@ -260,7 +272,7 @@ func buildAllGoBinaries() error {
 		{"windows", "amd64"},
 		{"windows", "386"},
 	} {
-		deps = append(deps, mg.F(buildGoBinary, distDir(), t, target.OS, target.Arch))
+		deps = append(deps, mg.F(buildGoBinary, distDir(), target.OS, target.Arch))
 	}
 	mg.Deps(deps...)
 	return nil
@@ -284,7 +296,7 @@ func Release() error {
 	}
 	debug.Println("==> set project version")
 	ver = strings.TrimPrefix(ver, "v")
-	if err := sh.Run("mvn", "versions:set", "-DnewVersion="+ver); err != nil {
+	if err := mvn( "versions:set", "-DnewVersion="+ver); err != nil {
 		return fmt.Errorf("error setting project version: %w", err)
 	}
 	sh.Rm("pom.xml.versionsBackup")
@@ -309,7 +321,7 @@ func Snapshot() error {
 	if ver == "" {
 		return fmt.Errorf("VERSION not set")
 	}
-	if err := sh.Run("mvn", "versions:set", "-DnewVersion="+ver+"-SNAPSHOT"); err != nil {
+	if err := mvn("versions:set", "-DnewVersion="+ver+"-SNAPSHOT"); err != nil {
 		return fmt.Errorf("error setting project version: %w", err)
 	}
 	return nil

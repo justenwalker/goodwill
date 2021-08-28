@@ -9,6 +9,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"go.justen.tech/goodwill/gw/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"io/ioutil"
@@ -16,20 +17,25 @@ import (
 )
 
 const (
-	EnvGRPCAddress = "GRPC_ADDR"
-	EnvMagicKey    = "GRPC_MAGIC_KEY"
-	EnvMagicValue  = "d0c08ee0-a663-4a6b-ad5e-00a5fca1e5cf"
-	EnvCAFile      = "GRPC_CA_CERT_FILE"
-	EnvCertFile    = "GRPC_CLIENT_CERT_FILE"
-	EnvKeyFile     = "GRPC_CLIENT_KEY_FILE"
-	EnvOrgName     = "CONCORD_ORG_NAME"
-	EnvProcessID   = "CONCORD_PROCESS_ID"
-	EnvWorkingDir  = "CONCORD_WORKING_DIRECTORY"
+	EnvGRPCAddress   = "GRPC_ADDR"
+	EnvMagicKey      = "GRPC_MAGIC_KEY"
+	EnvMagicValue    = "d0c08ee0-a663-4a6b-ad5e-00a5fca1e5cf"
+	EnvCAFile        = "GRPC_CA_CERT_FILE"
+	EnvCertFile      = "GRPC_CLIENT_CERT_FILE"
+	EnvKeyFile       = "GRPC_CLIENT_KEY_FILE"
+	EnvOrgName       = "CONCORD_ORG_NAME"
+	EnvProcessID     = "CONCORD_PROCESS_ID"
+	EnvWorkingDir    = "CONCORD_WORKING_DIRECTORY"
+	EnvServerVersion = "GOODWILL_SERVER_VERSION"
 )
 
 const (
 	ErrNoMagicKey = Error("no magic key provided")
 	ErrNoGRPCAddr = Error("no grpc address provided")
+)
+
+const (
+	MinServerVersion = "0.4.0"
 )
 
 var ranOnce bool
@@ -45,6 +51,10 @@ func Run(ctx context.Context, tr TaskRunner) error {
 	if os.Getenv(EnvMagicKey) != EnvMagicValue {
 		return ErrNoMagicKey
 	}
+	serverVersion := os.Getenv(EnvServerVersion)
+	if err := version.CheckCompatibility(serverVersion, MinServerVersion); err != nil {
+		return err
+	}
 	addr := os.Getenv(EnvGRPCAddress)
 	if addr == "" {
 		return ErrNoGRPCAddr
@@ -59,9 +69,10 @@ func Run(ctx context.Context, tr TaskRunner) error {
 		return fmt.Errorf("fail to configure TLS: %w", err)
 	}
 	c, err := newTask(addr, runtime{
-		OrgName:    orgName,
-		WorkingDir: os.Getenv(EnvWorkingDir),
-		ProcessID:  os.Getenv(EnvProcessID),
+		OrgName:       orgName,
+		WorkingDir:    os.Getenv(EnvWorkingDir),
+		ProcessID:     os.Getenv(EnvProcessID),
+		ServerVersion: serverVersion,
 	}, opts...)
 	if err != nil {
 		return fmt.Errorf("could not create context: %w", err)

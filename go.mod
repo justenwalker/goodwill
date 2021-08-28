@@ -6,6 +6,7 @@ require (
 	github.com/dave/jennifer v1.4.1
 	github.com/golang/protobuf v1.5.0 // indirect
 	github.com/magefile/mage v1.11.0
+	github.com/masterminds/semver v1.5.0
 	github.com/sebdah/goldie/v2 v2.5.3
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/stretchr/testify v1.5.1
@@ -15,6 +16,7 @@ require (
 )
 
 require (
+	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
