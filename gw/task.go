@@ -24,25 +24,28 @@ func newTask(addr string, rt runtime, opts ...grpc.DialOption) (*Task, error) {
 		return nil, fmt.Errorf("unable to connect to grpc server %q: %w", addr, err)
 	}
 	return &Task{
-		OrgName:    rt.OrgName,
-		WorkingDir: rt.WorkingDir,
-		ProcessID:  rt.ProcessID,
-		conn:       conn,
+		OrgName:       rt.OrgName,
+		WorkingDir:    rt.WorkingDir,
+		ProcessID:     rt.ProcessID,
+		ServerVersion: rt.ServerVersion,
+		conn:          conn,
 	}, nil
 }
 
 // runtime contains the process runtime information
 type runtime struct {
-	OrgName    string
-	WorkingDir string
-	ProcessID  string
+	OrgName       string
+	WorkingDir    string
+	ProcessID     string
+	ServerVersion string
 }
 
 type Task struct {
-	OrgName    string
-	WorkingDir string
-	ProcessID  string
-	conn       *grpc.ClientConn
+	OrgName       string
+	WorkingDir    string
+	ProcessID     string
+	ServerVersion string
+	conn          *grpc.ClientConn
 }
 
 type TaskRunner interface {

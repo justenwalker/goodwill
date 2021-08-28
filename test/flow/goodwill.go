@@ -7,6 +7,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"go.justen.tech/goodwill/gw"
 	"go.justen.tech/goodwill/gw/docker"
@@ -19,12 +20,16 @@ import (
 
 // Default is a flow that prints the working directory
 func Default(ctx context.Context, ts *gw.Task) error {
+	fmt.Println("MinServerVersion:", gw.MinServerVersion)
+	fmt.Println("ServerVersion:", ts.ServerVersion)
 	fmt.Println("====== Get Task Config")
 	cfg, err := ts.Config().Configuration(ctx)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Configuration: %#v\n", cfg)
+	bs, _ := json.MarshalIndent(cfg, "", "  ")
+	fmt.Println("Configuration:")
+	fmt.Println(string(bs))
 	_ = ts.Log(ctx, "Log Message: %d", 42)
 	return nil
 }
@@ -56,9 +61,8 @@ func SetVariables(ctx context.Context, ts *gw.Task) (map[string]value.Value, err
 		return nil, fmt.Errorf("ger variables failed: %w", err)
 	}
 	fmt.Println("Variables:")
-	for k, v := range vars {
-		fmt.Println(k, "=", v)
-	}
+	bs, _ := json.MarshalIndent(vars, "", "  ")
+	fmt.Println(string(bs))
 	return map[string]value.Value{
 		"foo": value.String("bar"),
 		"baz": value.Int64(1000),

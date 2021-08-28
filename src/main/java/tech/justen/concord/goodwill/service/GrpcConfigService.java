@@ -5,6 +5,7 @@ package tech.justen.concord.goodwill.service;
 
 import com.walmartlabs.concord.client.ApiClientConfiguration;
 import io.grpc.stub.StreamObserver;
+import tech.justen.concord.goodwill.BuildInfo;
 import tech.justen.concord.goodwill.TaskConfig;
 import tech.justen.concord.goodwill.grpc.ConfigProto.*;
 import tech.justen.concord.goodwill.grpc.ConfigServiceGrpc;
