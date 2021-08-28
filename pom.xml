@@ -45,6 +45,9 @@
         <protobuf.version>3.17.3</protobuf.version>
         <grpc.version>1.40.0</grpc.version>
         <apache.commons-compress.version>1.21</apache.commons-compress.version>
+        <guava.version>30.1.1-jre</guava.version>
+        <junit.version>4.13.2</junit.version>
+        <httpclient.version>4.5.13</httpclient.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
@@ -94,10 +97,27 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
         </dependency>
+
+        <!-- Dependency Overrides -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
             <version>${apache.commons-compress.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
         </dependency>
 
         <!-- Concord Dependencies -->
