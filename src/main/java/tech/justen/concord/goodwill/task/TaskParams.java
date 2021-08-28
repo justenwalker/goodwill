@@ -41,7 +41,7 @@ public class TaskParams {
 
     public static final String GONOSUMDB_KEY = "GONOSUMDB";
 
-    private static final String DEFAULT_GO_VERSION = "1.16.3";
+    private static final String DEFAULT_GO_VERSION = "1.16.7";
 
     private static final String DEFAULT_GO_OS = "linux";
 
@@ -126,7 +126,7 @@ public class TaskParams {
 
     public String getTasksBinary() {
         if (tasksBinary == null || tasksBinary.isEmpty()) {
-            if (getGoOS() == "windows") {
+            if (getGoOS().equals("windows")) {
                 return DEFAULT_BIN_EXE;
             }
             return DEFAULT_BIN;

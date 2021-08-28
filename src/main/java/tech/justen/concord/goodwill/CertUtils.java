@@ -50,13 +50,17 @@ public class CertUtils {
         public InputStream getCACertInputStream() throws IOException, CertificateException {
             X509Certificate ca = new JcaX509CertificateConverter().setProvider(BC_PROVIDER).getCertificate(this.cert);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            encodeCertificate(ca, new OutputStreamWriter(baos));
+            try(OutputStreamWriter osw = new OutputStreamWriter(baos)) {
+                encodeCertificate(ca, osw);
+            }
             return new ByteArrayInputStream(baos.toByteArray());
         }
 
         public InputStream getCAKeyInputStream() throws IOException {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            encodePrivateKey(keyPair.getPrivate(), new OutputStreamWriter(baos));
+            try(OutputStreamWriter osw = new OutputStreamWriter(baos)) {
+                encodePrivateKey(keyPair.getPrivate(), osw);
+            }
             return new ByteArrayInputStream(baos.toByteArray());
         }
 

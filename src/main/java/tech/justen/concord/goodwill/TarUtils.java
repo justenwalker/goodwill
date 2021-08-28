@@ -22,26 +22,27 @@ public class TarUtils {
     private static final Logger log = LoggerFactory.getLogger(TarUtils.class);
 
     public static void extractTarball(Path tarBall, Path out) throws IOException {
-        TarArchiveInputStream is = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(tarBall.toFile())));
-        try {
-            TarArchiveEntry entry;
-            while ((entry = (TarArchiveEntry) is.getNextEntry()) != null) {
-                final File outputFile = new File(out.toFile(), entry.getName());
-                if (entry.isDirectory()) {
-                    if (!outputFile.exists()) {
-                        outputFile.mkdirs();
+        try (FileInputStream fis = new FileInputStream(tarBall.toFile())) {
+            try (GZIPInputStream gzip = new GZIPInputStream(fis)) {
+                try (TarArchiveInputStream tar = new TarArchiveInputStream(gzip)) {
+                    TarArchiveEntry entry;
+                    while ((entry = (TarArchiveEntry) tar.getNextEntry()) != null) {
+                        final File outputFile = new File(out.toFile(), entry.getName());
+                        if (entry.isDirectory()) {
+                            if (!outputFile.exists()) {
+                                outputFile.mkdirs();
+                            }
+                        } else {
+                            outputFile.getParentFile().mkdirs();
+                            log.debug("tar.gz extract {} => {}", entry.getName(), outputFile);
+                            try (OutputStream outputFileStream = new FileOutputStream(outputFile)) {
+                                IOUtils.copy(tar, outputFileStream);
+                            }
+                            setPosixFilePermissions(outputFile.toPath(), entry.getMode());
+                        }
                     }
-                } else {
-                    outputFile.getParentFile().mkdirs();
-                    log.debug("tar.gz extract {} => {}", entry.getName(), outputFile);
-                    try (OutputStream outputFileStream = new FileOutputStream(outputFile)) {
-                        IOUtils.copy(is, outputFileStream);
-                    }
-                    setPosixFilePermissions(outputFile.toPath(), entry.getMode());
                 }
             }
-        } finally {
-            is.close();
         }
     }
 

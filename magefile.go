@@ -1,61 +1,91 @@
 // Copyright 2021, Justen Walker and the goodwill contributors
 // SPDX-License-Identifier: Apache-2.0
 
+//go:build mage
 // +build mage
 
 package main
 
 import (
-	"archive/zip"
-	"bufio"
 	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
-	"io"
-	"io/fs"
+	"go.justen.tech/goodwill/internal/mage"
+	"golang.org/x/sync/errgroup"
 	"io/ioutil"
 	"log"
-	"mime"
-	"mime/multipart"
-	"net/http"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
-)
-
-var (
-	version    string
-	goBinaries []artifact
-	jar        artifact
-	localBin   string
-	sumFile    string
-	lock       sync.Mutex
-)
-
-var (
-	curDir, _      = filepath.Abs(filepath.Join("."))
-	binDir         = filepath.Join(curDir, "bin")
-	distDir        = filepath.Join(curDir, "dist")
-	targetDir      = filepath.Join(curDir, "target")
-	goClasspathDir = filepath.Join(targetDir, "classes", "go")
-	testDir        = filepath.Join(curDir, "test")
-	terraformDir   = filepath.Join(testDir, "terraform")
-	cleanDirs      = []string{binDir, distDir, targetDir}
+	"time"
 )
 
 var Default = Package
 
+var (
+	curDir, _    = filepath.Abs(filepath.Join("."))
+	pubFile      = filepath.Join(curDir, "goodwill.pub")
+	targetDir    = filepath.Join(curDir, "target")
+	testDir      = filepath.Join(curDir, "test")
+	terraformDir = filepath.Join(testDir, "terraform")
+)
+
+var (
+	goClasspathDir = mage.DirOnce(filepath.Join(targetDir, "classes", "go"), 0o755)
+	binDir         = mage.DirOnce(filepath.Join(curDir, "bin"), 0o755)
+	distDir        = mage.DirOnce(filepath.Join(curDir, "dist"), 0o755)
+	cleanDirs      = []string{
+		filepath.Join(targetDir, "classes", "go"),
+		filepath.Join(curDir, "bin"),
+		filepath.Join(curDir, "dist"),
+	}
+)
+
+var (
+	pomVersion = mage.StringOnce(func() (string, error) {
+		return sh.Output("mvn", "org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate", "-Dexpression=project.version", "-q", "-DforceStdout")
+	})
+	version = mage.StringOnce(func() (string, error) {
+		if v := os.Getenv("VERSION"); v != "" {
+			return v, nil
+		}
+		v := pomVersion()
+		if sv := strings.TrimSuffix(v, "-SNAPSHOT"); sv != v {
+			ts := time.Now().UTC().Format("20060102150405")
+			c, err := sh.Output("git", "rev-parse", "--short=9", "HEAD")
+			if err != nil {
+				return "", err
+			}
+			return fmt.Sprintf("%s-%s-%s", sv, ts, c), nil
+		}
+		return v, nil
+	})
+	gitCommit = mage.StringOnce(func() (string, error) {
+		return sh.Output("git", "rev-parse", "HEAD")
+	})
+	sumFile = mage.StringOnce(func() (string, error) {
+		version := version()
+		return filepath.Join(distDir(), fmt.Sprintf("goodwill_%s_SHA256SUMS", version)), nil
+	})
+	localBin = mage.StringOnce(func() (string, error) {
+		str := filepath.Join(curDir, "bin", "goodwill")
+		if runtime.GOOS == "windows" {
+			str += ".exe"
+		}
+		return str, nil
+	})
+	concordData = mage.LoadOnce(filepath.Join(terraformDir, "concord-env.json"))
+)
+
 var debug = log.New(os.Stderr, "", 0)
 
-// Clean up build artifacts
+// Clean removes build artifacts and temporary files
 func Clean() error {
 	debug.Println("==> cleanup")
 	for _, dir := range cleanDirs {
@@ -66,6 +96,7 @@ func Clean() error {
 	return nil
 }
 
+// License adds licence headers to all files
 func License() error {
 	debug.Println("===> add license header")
 	return sh.RunV("addlicense", "-v",
@@ -73,115 +104,92 @@ func License() error {
 		"src", "gw", "internal", "test", "main.go", "magefile.go", "pom.xml")
 }
 
-// Build the Go binary only
-func Build() error {
-	localBin = filepath.Join(".", "bin", "goodwill")
-	if runtime.GOOS == "windows" {
-		localBin += ".exe"
-	}
-	debug.Println("==> build go binary:", localBin)
-	return sh.RunV(mg.GoCmd(), "build", "-o", localBin)
-}
-
-// Build the task JAR
-func PackageJAR() error {
-	if err := os.MkdirAll(distDir, os.FileMode(0o755)); err != nil {
-		return err
-	}
-	mg.SerialDeps(pomVersion, buildAllGoBinaries, copyGoBinaries)
-	debug.Println("==> package task")
-	err := sh.RunV("mvn", "package")
+// Bin builds the Go binary for the current os/arch
+func Bin() error {
+	debug.Println("==> build go binary:", localBin())
+	_, err := mage.BuildTarget(binDir(), time.Now(), mage.Build{
+		Version:   version(),
+		GitCommit: gitCommit(),
+		BuildTime: time.Now().UTC().Format(time.RFC3339),
+	}, mage.Target{
+		OS:       runtime.GOOS,
+		Arch:     runtime.GOARCH,
+		Filename: localBin(),
+	})
 	if err != nil {
 		return err
 	}
-	out := filepath.Join(targetDir, fmt.Sprintf("goodwill-%s-jar-with-dependencies.jar", version))
-	jar = artifact{
-		Filename: filepath.Join(distDir, fmt.Sprintf("goodwill-%s.jar", version)),
-	}
-	jar.Hash, err = hashFile(out)
-	if err != nil {
-		return err
-	}
-	return sh.Copy(jar.Filename, out)
-}
-
-// Build and package distribution files
-func Package() error {
-	mg.SerialDeps(Dependencies, Generate, PackageJAR, sha256Sums)
 	return nil
 }
 
-func Sign() error {
-	mg.Deps(pomVersion)
-	sumFile = filepath.Join(distDir, fmt.Sprintf("goodwill_%s_SHA256SUMS", version))
+var (
+	uberJar *mage.Artifact
+)
+
+// UberJAR builds the jar with all its dependencies
+func UberJAR() error {
+	if uberJar != nil {
+		return nil
+	}
+	mg.SerialDeps(buildAllGoBinaries, copyGoBinaries)
+	debug.Println("==> package task")
+	err := sh.RunV("mvn", "package", "-P", "package")
+	if err != nil {
+		return err
+	}
+	out := filepath.Join(targetDir, fmt.Sprintf("goodwill-%s-jar-with-dependencies.jar", pomVersion()))
+	artifact, err := mage.JarArtifact(distDir(), version(), out)
+	if err != nil {
+		return err
+	}
+	uberJar = artifact
+	return nil
+}
+
+// Build builds the project
+func Build() error {
+	mg.SerialDeps(Dependencies, Generate, UberJAR)
+	return nil
+}
+
+// Package distribution files
+func Package() error {
+	if os.Getenv("SIGNIFY_KEY") == "" {
+		return fmt.Errorf("SIGNIFY_KEY not set")
+	}
+	if err := sh.RunV("mvn", "clean"); err != nil {
+		return err
+	}
+	mg.SerialDeps(Clean, Build, writeSums, sign, verify)
+	return nil
+}
+
+// Deploy builds, packages, and uploads to maven central
+func Deploy() error {
+	mg.Deps(Package)
+	debug.Println("==> deploy to maven central")
+	return sh.RunV("mvn", "deploy", "-P", "release")
+}
+
+func sign() error {
+	file := sumFile()
 	key := os.Getenv("SIGNIFY_KEY")
 	if key == "" {
 		return fmt.Errorf("SIGNIFY_KEY not set")
 	}
-	return sh.RunV("signify", "-S", "-s", key, "-m", sumFile, "-x", sumFile+".sig")
+	return sh.RunV("signify", "-S", "-s", key, "-m", file, "-x", file+".sig")
 }
 
-func Verify() error {
-	mg.Deps(pomVersion)
-	pubFile := filepath.Join(curDir, "goodwill.pub")
-	sumFile = filepath.Join(distDir, fmt.Sprintf("goodwill_%s_SHA256SUMS", version))
+func verify() error {
 	debug.Println("==> verify sum signatures")
-	if err := sh.RunV("signify", "-V", "-p", pubFile, "-m", sumFile); err != nil {
+	if err := sh.RunV("signify", "-V", "-p", pubFile, "-m", sumFile()); err != nil {
 		return err
 	}
 	debug.Println("==> verify sha sums")
-	return verifySHA256Sums()
+	return mage.VerifySums(distDir(), sumFile())
 }
 
-func verifySHA256Sums() error {
-	sumFile = filepath.Join(distDir, fmt.Sprintf("goodwill_%s_SHA256SUMS", version))
-	data, err := ioutil.ReadFile(sumFile)
-	if err != nil {
-		return err
-	}
-	sc := bufio.NewScanner(bytes.NewBuffer(data))
-	for sc.Scan() {
-		fields := strings.Split(strings.TrimSpace(sc.Text()), "  ")
-		if len(fields) != 2 {
-			continue
-		}
-		filename, expected := fields[1], fields[0]
-		filename = filepath.Join(distDir, filename)
-		hash, err := hashFile(filename)
-		if err != nil {
-			return fmt.Errorf("%q: error hashing file: %w", filename, err)
-		}
-		if hash != expected {
-			return fmt.Errorf("%q: hash match. got=%q, expected=%q", filename, hash, expected)
-		}
-		debug.Printf("%s\tOK\n", filename)
-	}
-	return nil
-}
-
-func sha256Sums() (err error) {
-	var sf *os.File
-	sumFile = filepath.Join(distDir, fmt.Sprintf("goodwill_%s_SHA256SUMS", version))
-	sf, err = os.OpenFile(sumFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		cerr := sf.Close()
-		if err == nil {
-			err = cerr
-		}
-	}()
-	for _, b := range append(goBinaries, jar) {
-		_, err := sf.WriteString(fmt.Sprintf("%s  %s\n", b.Hash, filepath.Base(b.Filename)))
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// Ensure Go module dependencies are downloaded
+// Dependencies ensures Go module dependencies are downloaded
 func Dependencies() error {
 	debug.Println("==> download go dependencies")
 	if err := sh.RunV(mg.GoCmd(), "mod", "tidy"); err != nil {
@@ -190,31 +198,59 @@ func Dependencies() error {
 	return sh.RunV(mg.GoCmd(), "get")
 }
 
-// Generate Protobuf code for Go and Java
+// Generate generates protobuf code for Go and Java
 func Generate() error {
 	mg.Deps(GenerateGo, GenerateJava)
 	return nil
 }
 
-// Generate Go code
+// GenerateGo run go:generate
 func GenerateGo() error {
 	debug.Println("==> generate go code")
 	return sh.RunV(mg.GoCmd(), "generate")
 }
 
-// Generate Java Code
+// GenerateJava generates java sources
 func GenerateJava() error {
 	debug.Println("==> generate java code")
 	return sh.RunV("mvn", "generate-sources")
 }
 
-// Build Go binary for all architectures
-func buildAllGoBinaries() error {
-	if err := os.MkdirAll(distDir, os.FileMode(0o755)); err != nil {
+var lockGoBinaries sync.Mutex
+var goBinaries []mage.Artifact
+
+func addGoBinary(artifact mage.Artifact) {
+	lockGoBinaries.Lock()
+	defer lockGoBinaries.Unlock()
+	goBinaries = append(goBinaries, artifact)
+}
+
+// buildGoBinary builds a Go binary forthe target os/arch
+func buildGoBinary(distDir string, bt string, os string, arch string) error {
+	t, err := time.Parse(time.RFC3339, bt)
+	if err != nil {
 		return err
 	}
+	artifact, err := mage.BuildTarget(distDir, t, mage.Build{
+		Version:   version(),
+		GitCommit: gitCommit(),
+		BuildTime: bt,
+	}, mage.Target{
+		OS:   os,
+		Arch: arch,
+	})
+	if err != nil {
+		return err
+	}
+	addGoBinary(*artifact)
+	return nil
+}
+
+// buildAllGoBinaries builds Go binaries for all supported os/arch targets
+func buildAllGoBinaries() error {
+	t := time.Now().UTC().Format(time.RFC3339)
 	var deps []interface{}
-	for _, t := range []struct {
+	for _, target := range []struct {
 		OS   string
 		Arch string
 	}{
@@ -224,20 +260,29 @@ func buildAllGoBinaries() error {
 		{"windows", "amd64"},
 		{"windows", "386"},
 	} {
-		deps = append(deps, mg.F(buildGoBinary, distDir, t.OS, t.Arch))
+		deps = append(deps, mg.F(buildGoBinary, distDir(), t, target.OS, target.Arch))
 	}
 	mg.Deps(deps...)
 	return nil
 }
 
+// writeSums writes the SHA256 sum files for each artifact
+func writeSums() error {
+	var artifacts []string
+	for _, a := range goBinaries {
+		artifacts = append(artifacts, filepath.Join(distDir(), a.String()))
+	}
+	artifacts = append(artifacts, filepath.Join(distDir(), uberJar.String()))
+	return mage.WriteSums(sumFile(), artifacts)
+}
+
+// Release cuts a new release version and tags the repository
 func Release() error {
-	mg.Deps(Clean)
-	mg.SerialDeps(Dependencies, Generate)
-	debug.Println("==> set project version")
 	ver := os.Getenv("VERSION")
 	if ver == "" {
 		return fmt.Errorf("VERSION not set")
 	}
+	debug.Println("==> set project version")
 	ver = strings.TrimPrefix(ver, "v")
 	if err := sh.Run("mvn", "versions:set", "-DnewVersion="+ver); err != nil {
 		return fmt.Errorf("error setting project version: %w", err)
@@ -254,10 +299,10 @@ func Release() error {
 	if err := sh.Run("git", "tag", "--annotate", "-m", "Release v"+ver, "v"+ver); err != nil {
 		return err
 	}
-	mg.SerialDeps(PackageJAR, sha256Sums)
 	return nil
 }
 
+// Snapshot sets the project version to a snapshot
 func Snapshot() error {
 	debug.Println("==> set project version snapshot")
 	ver := os.Getenv("VERSION")
@@ -270,43 +315,39 @@ func Snapshot() error {
 	return nil
 }
 
-func pomVersion() error {
-	v, err := sh.Output("mvn", "org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate", "-Dexpression=project.version", "-q", "-DforceStdout")
-	version = v
-	return err
-}
-
 func copyGoBinaries() error {
 	debug.Println("==> copy go binaries to classpath")
-	if err := os.MkdirAll(goClasspathDir, 0o755); err != nil {
-		return err
-	}
 	for _, b := range goBinaries {
-		target := filepath.Join(goClasspathDir, b.NoVersion())
-		if err := sh.Copy(target, b.Filename); err != nil {
+		source := filepath.Join(distDir(), b.String())
+		b.Version = ""
+		target := filepath.Join(goClasspathDir(), b.String())
+		debug.Println("copy", target, "<=", source)
+		if err := sh.Copy(target, source); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-const (
-	authToken   = "LcJodmNtim3i1XfY0Pivsw"
-	orgName     = "Default"
-	projectName = "Test"
-)
-
+// E2EUp starts the end to end test environment
 func E2EUp() error {
+	cenv := concordEnv()
 	chdir := "-chdir=" + terraformDir
 	if _, err := os.Stat(filepath.Join(terraformDir, ".terraform")); err != nil {
 		if err := sh.RunV("terraform", chdir, "init"); err != nil {
 			return err
 		}
 	}
-	return sh.RunV("terraform", chdir, "apply", "-auto-approve")
-
+	if err := sh.RunV("terraform", chdir, "apply", "-var", "concord_api_key="+cenv.AgentKey, "-auto-approve"); err != nil {
+		return err
+	}
+	debug.Println("===> Waiting for Concord")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+	return mage.WaitConcordRunning(ctx, cenv)
 }
 
+// E2EDown tears down the end to end test environment
 func E2EDown() error {
 	return sh.RunV("terraform", "-chdir="+terraformDir, "destroy", "-auto-approve")
 }
@@ -320,209 +361,180 @@ func vendorTestFlow() error {
 }
 
 func precompileTestFlow() error {
-	mg.Deps(Build)
-	return sh.RunV(localBin, "-debug", "-os", "linux", "-arch", "amd64", "-dir", filepath.Join(testDir, "flow"), "-out", filepath.Join(testDir, "flow", "goodwill.tasks"))
+	mg.Deps(Bin)
+	return sh.RunV(localBin(), "-debug", "-os", "linux", "-arch", "amd64", "-dir", filepath.Join(testDir, "flow"), "-out", filepath.Join(testDir, "flow", "goodwill.tasks"))
 }
 
-func E2E() error {
-	mg.Deps(Package, E2EUp)
+func e2eDeps() {
 	mg.SerialDeps(vendorTestFlow, precompileTestFlow)
-	debug.Println("===> API Key:", authToken)
+}
 
-	runE2ETest("compiled", []payloadFile{
-		{filepath.Join(testDir, "concord.yml"), "concord.yml"},
-		{jar.Filename, "lib/goodwill.jar"},
-		{filepath.Join(testDir, "flow", "goodwill.go"), "goodwill.go"},
-		{filepath.Join(testDir, "flow", "go.mod"), "go.mod"},
-		{filepath.Join(testDir, "flow", "go.sum"), "go.sum"},
-		{filepath.Join(testDir, "flow", "vendor"), "vendor"},
-	})
-	runE2ETest("precompiled", []payloadFile{
-		{filepath.Join(testDir, "concord.yml"), "concord.yml"},
-		{jar.Filename, "lib/goodwill.jar"},
-		{filepath.Join(testDir, "flow", "goodwill.tasks"), "goodwill.tasks"},
-	})
-	runE2ETest("v2", []payloadFile{
-		{filepath.Join(testDir, "concord-v2.yml"), "concord.yml"},
-		{jar.Filename, "lib/goodwill.jar"},
-		{filepath.Join(testDir, "flow", "goodwill.tasks"), "goodwill.tasks"},
-	})
+// E2ETestPublished runts end to end tests targeting published maven artifacts
+func E2ETestPublished() error {
+	mg.Deps(E2EUp, e2eDeps)
+	tests := []e2eTest{
+		{
+			"published",
+			mage.ConcordParams{
+				Runtime:      mage.ConcordRuntimeV1,
+				Dependencies: true,
+				Version:      pomVersion(),
+			},
+			[]mage.ZipFile{
+				{Source: filepath.Join(testDir, "flow", "goodwill.tasks"), Dest: "goodwill.tasks"},
+			},
+		},
+		{
+			"published-v2",
+			mage.ConcordParams{
+				Runtime:      mage.ConcordRuntimeV2,
+				Dependencies: true,
+				Version:      pomVersion(),
+			},
+			[]mage.ZipFile{
+				{Source: filepath.Join(testDir, "flow", "goodwill.tasks"), Dest: "goodwill.tasks"},
+			},
+		},
+	}
+	if err := runE2ETests(tests); err != nil {
+		return err
+	}
+	return waitE2ETests()
+}
+
+// E2ETest runs end to end tests
+func E2ETest() error {
+	mg.Deps(Build, E2EUp, e2eDeps)
+	jar := filepath.Join(distDir(), uberJar.String())
+	tests := []e2eTest{
+		{
+			"compiled",
+			mage.ConcordParams{
+				Runtime:   mage.ConcordRuntimeV1,
+				GoVersion: "1.16.7",
+				UseDocker: true,
+			},
+			[]mage.ZipFile{
+				{Source: jar, Dest: "lib/goodwill.jar"},
+				{Source: filepath.Join(testDir, "flow", "goodwill.go"), Dest: "goodwill.go"},
+				{Source: filepath.Join(testDir, "flow", "go.mod"), Dest: "go.mod"},
+				{Source: filepath.Join(testDir, "flow", "go.sum"), Dest: "go.sum"},
+				{Source: filepath.Join(testDir, "flow", "vendor"), Dest: "vendor"},
+			},
+		},
+		{
+			"compiled-v2",
+			mage.ConcordParams{
+				Runtime:   mage.ConcordRuntimeV2,
+				GoVersion: "1.16.7",
+				UseDocker: true,
+			},
+			[]mage.ZipFile{
+				{Source: jar, Dest: "lib/goodwill.jar"},
+				{Source: filepath.Join(testDir, "flow", "goodwill.go"), Dest: "goodwill.go"},
+				{Source: filepath.Join(testDir, "flow", "go.mod"), Dest: "go.mod"},
+				{Source: filepath.Join(testDir, "flow", "go.sum"), Dest: "go.sum"},
+				{Source: filepath.Join(testDir, "flow", "vendor"), Dest: "vendor"},
+			},
+		},
+		{
+			"precompiled",
+			mage.ConcordParams{
+				Runtime:   mage.ConcordRuntimeV1,
+				GoVersion: "1.16.7",
+				UseDocker: true,
+			},
+			[]mage.ZipFile{
+				{Source: jar, Dest: "lib/goodwill.jar"},
+				{Source: filepath.Join(testDir, "flow", "goodwill.tasks"), Dest: "goodwill.tasks"},
+			},
+		},
+		{
+			"precompiled-v2",
+			mage.ConcordParams{
+				Runtime:   mage.ConcordRuntimeV2,
+				GoVersion: "1.16.7",
+				UseDocker: true,
+			},
+			[]mage.ZipFile{
+				{Source: jar, Dest: "lib/goodwill.jar"},
+				{Source: filepath.Join(testDir, "flow", "goodwill.tasks"), Dest: "goodwill.tasks"},
+			},
+		},
+	}
+	if err := runE2ETests(tests); err != nil {
+		return err
+	}
+	return waitE2ETests()
+}
+
+type e2eTest struct {
+	name   string
+	params mage.ConcordParams
+	files  []mage.ZipFile
+}
+
+var e2eTests []string
+
+func waitE2ETests() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+	group, ctx := errgroup.WithContext(ctx)
+	for _, p := range e2eTests {
+		processID := p
+		group.Go(func() error {
+			return waitE2ETest(ctx, processID)
+		})
+	}
+	return group.Wait()
+}
+
+func waitE2ETest(ctx context.Context, processID string) error {
+	if err := mage.WaitConcordProcess(ctx, concordEnv(), processID); err != nil {
+		debug.Println("- FAIL:", processID)
+		return fmt.Errorf("%s: %w", processID, err)
+	}
+	debug.Println("- PASS:", processID)
 	return nil
 }
 
-type payloadFile struct {
-	From string
-	To   string
+func runE2ETests(tests []e2eTest) error {
+	var testerrors bool
+	for _, test := range tests {
+		if _, err := runE2ETest(test.name, test.params, test.files); err != nil {
+			debug.Println("[ERROR]", test.name, err)
+		}
+	}
+	debug.Println("===> API Key:", concordEnv().APIKey)
+	if testerrors {
+		return fmt.Errorf("Error running tests")
+	}
+	return nil
 }
 
-func runE2ETest(name string, files []payloadFile, ) error {
+func runE2ETest(name string, params mage.ConcordParams, files []mage.ZipFile) (string, error) {
+	cenv := concordEnv()
 	debug.Println("===> run e2e test", name)
-	var buf bytes.Buffer
-	mpw := multipart.NewWriter(&buf)
-	mpw.WriteField("org", orgName)
-	mpw.WriteField("project", projectName)
-	payload, err := mpw.CreateFormFile("archive", "payload.zip")
+	var concordYAML bytes.Buffer
+	if err := mage.GenerateConcordYaml(&concordYAML, params); err != nil {
+		return "", err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	instanceID, err := mage.NewConcordProcess(ctx, cenv, &concordYAML, files)
 	if err != nil {
-		return err
+		return "", err
 	}
-	zw := zip.NewWriter(payload)
-	for _, file := range files {
-		stat, err := os.Stat(file.From)
-		if err != nil {
-			return err
-		}
-		if stat.IsDir() {
-			err = addZipDir(zw, file.From, file.To)
-		} else {
-			err = addZipFile(zw, file.From, file.To)
-		}
-		if err != nil {
-			return err
-		}
-	}
-	if err := zw.Close(); err != nil {
-		return fmt.Errorf("close zip file: %w", err)
-	}
-	if err := mpw.Close(); err != nil {
-		return fmt.Errorf("close multipart file: %w", err)
-	}
-	req, err := http.NewRequest(http.MethodPost, "http://localhost:8001/api/v1/process", &buf)
-	if err != nil {
-		return fmt.Errorf("could not create http request: %w", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+authToken)
-	req.Header.Set("Content-Type", mime.FormatMediaType("multipart/form-data", map[string]string{"boundary": mpw.Boundary()}))
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("could not send http request: %w", err)
-	}
-	defer resp.Body.Close()
-	rbody, err := ioutil.ReadAll(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		if err != nil {
-			return err
-		}
-		return fmt.Errorf("%s: %s", resp.Status, string(rbody))
-	}
-	response := struct {
-		InstanceID string `json:"instanceId"`
-	}{}
-	if err := json.Unmarshal(rbody, &response); err != nil {
-		return fmt.Errorf("could not parse concord response: %w\nresponse:\n%s", err, string(rbody))
-	}
+	e2eTests = append(e2eTests, instanceID)
 	debug.Println("Concord Job Submitted:")
-	debug.Printf("http://localhost:8001/#process/%s/status", response.InstanceID)
-	return nil
+	debug.Printf("http://localhost:8001/#process/%s/status", instanceID)
+	return instanceID, nil
 }
 
-func addZipDir(zw *zip.Writer, dir string, dest string) error {
-	return filepath.Walk(dir, func(filename string, info fs.FileInfo, err error) error {
-		if info.IsDir() {
-			return nil
-		}
-		return addZipFile(zw, filename, path.Join(dest, strings.TrimPrefix(filename, dir)))
-	})
-}
-
-func addZipFile(zw *zip.Writer, filename string, dest string) error {
-	//debug.Printf("> payload: %s <- %s", dest, filename)
-	w, err := zw.Create(dest)
-	if err != nil {
-		return err
+func concordEnv() mage.ConcordEnv {
+	var env mage.ConcordEnv
+	if err := json.Unmarshal(concordData(), &env); err != nil {
+		debug.Fatalln("ERROR", err)
 	}
-	f, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	_, err = io.Copy(w, f)
-	return err
-}
-
-func addBinary(b artifact) {
-	lock.Lock()
-	goBinaries = append(goBinaries, b)
-	lock.Unlock()
-}
-
-type artifact struct {
-	Filename string
-	OS       string
-	Arch     string
-	Ext      string
-	Hash     string
-}
-
-func (b artifact) String() string {
-	var sb strings.Builder
-	sb.WriteString("goodwill_")
-	sb.WriteString(version)
-	if b.OS != "" {
-		sb.WriteRune('_')
-		sb.WriteString(b.OS)
-	}
-	if b.Arch != "" {
-		sb.WriteRune('_')
-		sb.WriteString(b.Arch)
-	}
-	if b.Ext != "" {
-		sb.WriteRune('.')
-		sb.WriteString(b.Ext)
-	}
-	return sb.String()
-}
-
-func (b artifact) NoVersion() string {
-	var sb strings.Builder
-	sb.WriteString("goodwill")
-	if b.OS != "" {
-		sb.WriteRune('_')
-		sb.WriteString(b.OS)
-	}
-	if b.Arch != "" {
-		sb.WriteRune('_')
-		sb.WriteString(b.Arch)
-	}
-	if b.Ext != "" {
-		sb.WriteRune('.')
-		sb.WriteString(b.Ext)
-	}
-	return sb.String()
-}
-
-func buildGoBinary(dir, goos, goarch string) error {
-	bin := artifact{
-		OS:   goos,
-		Arch: goarch,
-	}
-	if goos == "windows" {
-		bin.Ext = "exe"
-	}
-	bin.Filename = filepath.Join(dir, bin.String())
-	err := sh.RunWithV(map[string]string{
-		"GOOS":   goos,
-		"GOARCH": goarch,
-	}, mg.GoCmd(), "build", "-o", bin.Filename)
-	if err != nil {
-		return err
-	}
-	bin.Hash, err = hashFile(bin.Filename)
-	if err != nil {
-		return err
-	}
-	addBinary(bin)
-	return nil
-}
-
-func hashFile(filename string) (string, error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-	h := sha256.New()
-	if _, err := io.Copy(h, f); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(h.Sum(nil)), nil
+	return env
 }

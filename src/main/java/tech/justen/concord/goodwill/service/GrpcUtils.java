@@ -15,6 +15,7 @@ import com.google.protobuf.Message;
 import com.walmartlabs.concord.ApiException;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import tech.justen.concord.goodwill.grpc.ContextProto;
 import tech.justen.concord.goodwill.grpc.ContextProto.*;
 
 import java.io.OutputStream;
@@ -76,8 +77,8 @@ public class GrpcUtils {
         if (v.is(MapValue.class)) {
             Map<String, Value> map = v.unpack(MapValue.class).getValueMap();
             Map<String, Object> result = new HashMap<>();
-            for (String key : map.keySet()) {
-                result.put(key, fromAny(map.get(key).getValue()));
+            for (Map.Entry<String, ContextProto.Value> entry : map.entrySet()) {
+                result.put(entry.getKey(), fromAny(entry.getValue().getValue()));
             }
             return result;
         }
@@ -172,8 +173,8 @@ public class GrpcUtils {
 
     private static Any getAny(Map<String, Object> value) {
         MapValue.Builder map = MapValue.newBuilder();
-        for (String key : value.keySet()) {
-            map.putValue(key, valueOf(value.get(key)));
+        for (Map.Entry<String, Object> entry : value.entrySet()) {
+            map.putValue(entry.getKey(), valueOf(entry.getValue()));
         }
         return any(map.build());
     }

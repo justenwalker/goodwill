@@ -13,13 +13,25 @@ import (
 	"strings"
 )
 
-func Run() int {
+type VersionInfo struct {
+	Version   string
+	GitCommit string
+	BuildTime string
+}
+
+func Run(v VersionInfo) int {
 	var flg flags
 	if !flg.Parse() {
 		return 128
 	}
 	if flg.Debug {
 		SetDebug(log.New(os.Stderr, "[DEBUG] ", 0))
+	}
+	if flg.Version {
+		fmt.Println("Version:    ", v.Version)
+		fmt.Println("Git Commit: ", v.GitCommit)
+		fmt.Println("Build Time: ", v.BuildTime)
+		return 0
 	}
 	data, err := parsePackage(flg)
 	if err != nil {

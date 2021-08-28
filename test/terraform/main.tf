@@ -6,17 +6,26 @@
 locals {
   agent_volume_name = "concord-agent-data"
   template_vars = {
-    pg_password         = var.pg_password,
-    ldap_org            = var.ldap_org,
-    ldap_domain         = var.ldap_domain,
-    ldap_base_dn        = var.ldap_base_dn,
-    ldap_admin_password = var.ldap_admin_password,
+    pg_password           = var.pg_password,
+    ldap_org              = var.ldap_org,
+    ldap_domain           = var.ldap_domain,
+    ldap_base_dn          = var.ldap_base_dn,
+    ldap_admin_password   = var.ldap_admin_password,
+    concord_api_key       = var.concord_api_key,
+    sonatype_username     = var.sonatype_username,
+    sonatype_password     = var.sonatype_password,
+    sonatype_staging_repo = var.sonatype_staging_repo,
   }
 }
 
 resource "local_file" "concord-server-config" {
   content  = templatefile("${path.module}/files/concord-server.conf.tpl", local.template_vars)
   filename = abspath("${path.module}/files/concord-server.conf")
+}
+
+resource "local_file" "maven-config" {
+  content  = templatefile("${path.module}/files/maven.json.tpl", local.template_vars)
+  filename = abspath("${path.module}/files/maven.json")
 }
 
 resource "local_file" "concord-agent-config" {
@@ -85,8 +94,8 @@ resource "docker_container" "ldap" {
     read_only      = true
   }
   networks_advanced {
-    name = docker_network.net.name
-    aliases = ["ldap"]
+    name         = docker_network.net.name
+    aliases      = ["ldap"]
     ipv4_address = cidrhost(var.ipv4_cidr, 2)
     ipv6_address = cidrhost(var.ipv6_cidr, 2)
   }
@@ -117,8 +126,8 @@ resource "docker_container" "postgres" {
     container_path = "/var/lib/postgresql/data"
   }
   networks_advanced {
-    name = docker_network.net.name
-    aliases = ["db"]
+    name         = docker_network.net.name
+    aliases      = ["db"]
     ipv4_address = cidrhost(var.ipv4_cidr, 3)
     ipv6_address = cidrhost(var.ipv6_cidr, 3)
   }
@@ -141,8 +150,14 @@ resource "docker_container" "concord-server" {
     container_path = "/concord.conf"
     read_only      = true
   }
+  volumes {
+    host_path      = local_file.maven-config.filename
+    container_path = "/maven.json"
+    read_only      = true
+  }
   env = [
-    "CONCORD_CFG_FILE=/concord.conf"
+    "CONCORD_CFG_FILE=/concord.conf",
+    "CONCORD_MAVEN_CFG=/maven.json"
   ]
   networks_advanced {
     name = docker_network.net.name
@@ -173,9 +188,15 @@ resource "docker_container" "concord-agent" {
     volume_name    = docker_volume.concord-agent-data.name
     container_path = "/tmp"
   }
+  volumes {
+    host_path      = local_file.maven-config.filename
+    container_path = "/maven.json"
+    read_only      = true
+  }
   env = [
     "DOCKER_HOST=tcp://dind:6666",
     "CONCORD_CFG_FILE=/concord.conf",
+    "CONCORD_MAVEN_CFG=/maven.json",
     "CONCORD_DOCKER_LOCAL_MODE=false",
     "GOPRIVATE=${var.goprivate}",
     "GOPROXY=${var.goproxy}",
@@ -184,8 +205,8 @@ resource "docker_container" "concord-agent" {
     "GONOSUMDB=${var.gonosumdb}",
   ]
   networks_advanced {
-    name = docker_network.net.name
-    aliases = ["concord-agent"]
+    name         = docker_network.net.name
+    aliases      = ["concord-agent"]
     ipv4_address = cidrhost(var.ipv4_cidr, 6)
     ipv6_address = cidrhost(var.ipv6_cidr, 6)
   }
@@ -207,9 +228,8 @@ resource "docker_container" "dind" {
   ]
   privileged = true
   networks_advanced {
-    name = docker_network.net.name
-    aliases = [
-    "dind"]
+    name         = docker_network.net.name
+    aliases      = ["dind"]
     ipv4_address = cidrhost(var.ipv4_cidr, 4)
     ipv6_address = cidrhost(var.ipv6_cidr, 4)
   }
