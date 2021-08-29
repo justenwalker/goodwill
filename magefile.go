@@ -41,7 +41,7 @@ var (
 	binDir         = mage.DirOnce(filepath.Join(curDir, "bin"), 0o755)
 	distDir        = mage.DirOnce(filepath.Join(curDir, "dist"), 0o755)
 	cleanDirs      = []string{
-		filepath.Join(targetDir, "classes", "go"),
+		targetDir,
 		filepath.Join(curDir, "bin"),
 		filepath.Join(curDir, "dist"),
 	}
@@ -225,7 +225,7 @@ func GenerateGo() error {
 // GenerateJava generates java sources
 func GenerateJava() error {
 	debug.Println("==> generate java code")
-	return mvn( "generate-sources")
+	return mvn("generate-sources")
 }
 
 var lockGoBinaries sync.Mutex
@@ -296,7 +296,7 @@ func Release() error {
 	}
 	debug.Println("==> set project version")
 	ver = strings.TrimPrefix(ver, "v")
-	if err := mvn( "versions:set", "-DnewVersion="+ver); err != nil {
+	if err := mvn("versions:set", "-DnewVersion="+ver); err != nil {
 		return fmt.Errorf("error setting project version: %w", err)
 	}
 	sh.Rm("pom.xml.versionsBackup")
@@ -361,7 +361,27 @@ func E2EUp() error {
 
 // E2EDown tears down the end to end test environment
 func E2EDown() error {
-	return sh.RunV("terraform", "-chdir="+terraformDir, "destroy", "-auto-approve")
+	debug.Println("==> destroy terraform environment")
+	if err := sh.RunV("terraform", "-chdir="+terraformDir, "destroy", "-auto-approve"); err != nil {
+		return err
+	}
+	debug.Println("==> cleanup terraform files")
+	cleanFiles := []string{
+		filepath.Join(terraformDir, ".terraform"),
+		filepath.Join(terraformDir, ".terraform.lock.hcl"),
+		filepath.Join(terraformDir, "terraform.tfstate"),
+		filepath.Join(terraformDir, "terraform.tfstate.backup"),
+		filepath.Join(terraformDir, "files", "maven.json"),
+		filepath.Join(terraformDir, "files", "bootstrap.ldif"),
+		filepath.Join(terraformDir, "files", "concord-agent.conf"),
+		filepath.Join(terraformDir, "files", "concord-server.conf"),
+	}
+	for _, dir := range cleanFiles {
+		if err := sh.Rm(dir); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func vendorTestFlow() error {
