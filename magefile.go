@@ -26,7 +26,7 @@ import (
 	"time"
 )
 
-var Default = Package
+var Default = Build
 
 var (
 	curDir, _    = filepath.Abs(filepath.Join("."))
