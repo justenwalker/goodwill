@@ -166,13 +166,24 @@ func Build() error {
 
 // Package distribution files
 func Package() error {
-	if os.Getenv("SIGNIFY_KEY") == "" {
-		return fmt.Errorf("SIGNIFY_KEY not set")
-	}
 	if err := mvn("clean"); err != nil {
 		return err
 	}
 	mg.SerialDeps(Clean, Build, writeSums, sign, verify)
+	return nil
+}
+
+// Sign signs the SHA sum file using SIGNIFY_KEY
+func Sign() error {
+	_, err := os.Stat(sumFile())
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return err
+		}
+		mg.SerialDeps(Package)
+		return nil
+	}
+	mg.SerialDeps(sign, verify)
 	return nil
 }
 
@@ -184,6 +195,9 @@ func Deploy() error {
 }
 
 func sign() error {
+	if os.Getenv("SIGNIFY_KEY") == "" {
+		return fmt.Errorf("SIGNIFY_KEY not set")
+	}
 	file := sumFile()
 	key := os.Getenv("SIGNIFY_KEY")
 	if key == "" {
