@@ -197,16 +197,14 @@ func (m Nexus) Deploy() error {
 	return mvn("deploy", "-P", "release")
 }
 
-func (m Nexus) Release() error {
-	mg.Deps(Package)
+func (m Nexus) Release(stagingID string) error {
 	debug.Println("==> release to maven central")
-	return mvn("mvn", "-P", "release", "nexus-staging:release")
+	return mvn("nexus-staging:release", "-P", "release", "-DstagingRepositoryId="+stagingID)
 }
 
-func (m Nexus) Drop() error {
-	mg.Deps(Package)
+func (m Nexus) Drop(stagingID string) error {
 	debug.Println("==> drop staging release")
-	return mvn("mvn", "-P", "release", "nexus-staging:drop")
+	return mvn("nexus-staging:release", "-P", "release", "-DstagingRepositoryId="+stagingID)
 }
 
 func sign() error {
