@@ -11,7 +11,7 @@
 
     <groupId>tech.justen.concord</groupId>
     <artifactId>goodwill</artifactId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.6.0-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Goodwill is a plugin for Walmart Labs Concord. It provides a way to write tasks in Go by providing a
@@ -41,11 +41,11 @@
     </scm>
 
     <properties>
-        <concord.version>1.88.0</concord.version>
-        <protobuf.version>3.17.3</protobuf.version>
-        <grpc.version>1.40.0</grpc.version>
+        <concord.version>1.101.0</concord.version>
+        <protobuf.version>3.22.2</protobuf.version>
+        <grpc.version>1.54.0</grpc.version>
         <apache.commons-compress.version>1.21</apache.commons-compress.version>
-        <guava.version>30.1.1-jre</guava.version>
+        <guava.version>31.1-jre</guava.version>
         <junit.version>4.13.2</junit.version>
         <httpclient.version>4.5.13</httpclient.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -196,15 +196,16 @@
             <plugin>
                 <groupId>org.eclipse.sisu</groupId>
                 <artifactId>sisu-maven-plugin</artifactId>
+                <version>0.9.0.M1</version>
             </plugin>
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
                 <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:3.12.0:exe:${os.detected.classifier}</protocArtifact>
+                    <protocArtifact>com.google.protobuf:protoc:3.21.9:exe:${os.detected.classifier}</protocArtifact>
                     <pluginId>grpc-java</pluginId>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.35.0:exe:${os.detected.classifier}</pluginArtifact>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.50.2:exe:${os.detected.classifier}</pluginArtifact>
                 </configuration>
                 <executions>
                     <execution>
@@ -225,7 +226,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.1.1</version>
+                        <version>3.4.2</version>
                         <configuration>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -280,7 +281,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.8</version>
+                        <version>1.6.13</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>

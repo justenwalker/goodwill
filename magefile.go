@@ -160,7 +160,8 @@ func UberJAR() error {
 
 // Build builds the project
 func Build() error {
-	mg.SerialDeps(Dependencies, Generate, UberJAR)
+	var g Generate
+	mg.SerialDeps(Dependencies, g.All, UberJAR)
 	return nil
 }
 
@@ -187,11 +188,25 @@ func Sign() error {
 	return nil
 }
 
+type Nexus mg.Namespace
+
 // Deploy builds, packages, and uploads to maven central
-func Deploy() error {
+func (m Nexus) Deploy() error {
 	mg.Deps(Package)
 	debug.Println("==> deploy to maven central")
 	return mvn("deploy", "-P", "release")
+}
+
+func (m Nexus) Release() error {
+	mg.Deps(Package)
+	debug.Println("==> release to maven central")
+	return mvn("mvn", "-P", "release", "nexus-staging:release")
+}
+
+func (m Nexus) Drop() error {
+	mg.Deps(Package)
+	debug.Println("==> drop staging release")
+	return mvn("mvn", "-P", "release", "nexus-staging:drop")
 }
 
 func sign() error {
@@ -224,20 +239,22 @@ func Dependencies() error {
 	return sh.RunV(mg.GoCmd(), "get")
 }
 
+type Generate mg.Namespace
+
 // Generate generates protobuf code for Go and Java
-func Generate() error {
-	mg.Deps(GenerateGo, GenerateJava)
+func (g Generate) All() error {
+	mg.Deps(g.Go, g.Java)
 	return nil
 }
 
 // GenerateGo run go:generate
-func GenerateGo() error {
+func (g Generate) Go() error {
 	debug.Println("==> generate go code")
 	return sh.RunV(mg.GoCmd(), "generate")
 }
 
 // GenerateJava generates java sources
-func GenerateJava() error {
+func (g Generate) Java() error {
 	debug.Println("==> generate java code")
 	return mvn("generate-sources")
 }
@@ -355,8 +372,10 @@ func copyGoBinaries() error {
 	return nil
 }
 
+type E2E mg.Namespace
+
 // E2EUp starts the end to end test environment
-func E2EUp() error {
+func (e E2E) Up() error {
 	cenv := concordEnv()
 	chdir := "-chdir=" + terraformDir
 	if _, err := os.Stat(filepath.Join(terraformDir, ".terraform")); err != nil {
@@ -374,7 +393,7 @@ func E2EUp() error {
 }
 
 // E2EDown tears down the end to end test environment
-func E2EDown() error {
+func (e E2E) Down() error {
 	debug.Println("==> destroy terraform environment")
 	if err := sh.RunV("terraform", "-chdir="+terraformDir, "destroy", "-auto-approve"); err != nil {
 		return err
@@ -416,8 +435,8 @@ func e2eDeps() {
 }
 
 // E2ETestPublished runts end to end tests targeting published maven artifacts
-func E2ETestPublished() error {
-	mg.Deps(E2EUp, e2eDeps)
+func (e E2E) TestPublished() error {
+	mg.Deps(e.Up, e2eDeps)
 	tests := []e2eTest{
 		{
 			"published",
@@ -449,15 +468,15 @@ func E2ETestPublished() error {
 }
 
 // E2ETest runs end to end tests
-func E2ETest() error {
-	mg.Deps(Build, E2EUp, e2eDeps)
+func (e E2E) Test() error {
+	mg.Deps(Build, e.Up, e2eDeps)
 	jar := filepath.Join(distDir(), uberJar.String())
 	tests := []e2eTest{
 		{
 			"compiled",
 			mage.ConcordParams{
 				Runtime:   mage.ConcordRuntimeV1,
-				GoVersion: "1.16.7",
+				GoVersion: "1.20.3",
 				UseDocker: true,
 			},
 			[]mage.ZipFile{
@@ -472,7 +491,7 @@ func E2ETest() error {
 			"compiled-v2",
 			mage.ConcordParams{
 				Runtime:   mage.ConcordRuntimeV2,
-				GoVersion: "1.16.7",
+				GoVersion: "1.20.3",
 				UseDocker: true,
 			},
 			[]mage.ZipFile{
@@ -487,7 +506,7 @@ func E2ETest() error {
 			"precompiled",
 			mage.ConcordParams{
 				Runtime:   mage.ConcordRuntimeV1,
-				GoVersion: "1.16.7",
+				GoVersion: "1.20.3",
 				UseDocker: true,
 			},
 			[]mage.ZipFile{
@@ -499,7 +518,7 @@ func E2ETest() error {
 			"precompiled-v2",
 			mage.ConcordParams{
 				Runtime:   mage.ConcordRuntimeV2,
-				GoVersion: "1.16.7",
+				GoVersion: "1.20.3",
 				UseDocker: true,
 			},
 			[]mage.ZipFile{

@@ -1,24 +1,22 @@
-ARG GO_VER="1.17"
-ARG PROTOC_VER="3.17.3"
-ARG PROTOC_GEN_GO_VER="1.27"
-ARG PROTOC_GEN_GRPC_VER="1.1.0"
-ARG JDK_VER="11"
-ARG JDK_PATCH="28"
-ARG MAVEN_VER="3.8.2"
+ARG GO_VER="1.20.3"
+ARG PROTOC_VER="22.2"
+ARG PROTOC_GEN_GO_VER="1.30.0"
+ARG PROTOC_GEN_GRPC_VER="1.54.0"
+ARG JDK_VER="20"
+ARG MAVEN_VER="3.9.1"
 FROM ubuntu:20.04 as build
 ARG GO_VER
 ARG PROTOC_VER
 ARG PROTOC_GEN_GO_VER
 ARG PROTOC_GEN_GRPC_VER
 ARG JDK_VER
-ARG JDK_PATCH
 ARG MAVEN_VER
 RUN apt update && apt install -y curl git xzdec wget unzip build-essential
-RUN curl -sLo /tmp/jdk.tgz "https://download.java.net/openjdk/jdk${JDK_VER}/ri/openjdk-${JDK_VER}+${JDK_PATCH}_linux-x64_bin.tar.gz"
-RUN curl -sLo /tmp/protoc.zip "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VER}/protoc-${PROTOC_VER}-linux-x86_64.zip"
+RUN curl -sLo /tmp/jdk.tgz "https://download.java.net/java/GA/jdk${JDK_VER}/bdc68b4b9cbc4ebcb30745c85038d91d/36/GPL/openjdk-${JDK_VER}_linux-aarch64_bin.tar.gz"
+RUN curl -sLo /tmp/protoc.zip "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VER}/protoc-${PROTOC_VER}-linux-aarch_64.zip"
 RUN curl -sLo /tmp/go.tgz "https://golang.org/dl/go${GO_VER}.linux-amd64.tar.gz"
 RUN curl -sLo /tmp/maven.tgz "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VER}/binaries/apache-maven-${MAVEN_VER}-bin.tar.gz"
-RUN curl -sLo /tmp/signify.txz "https://github.com/aperezdc/signify/releases/download/v30/signify-30.tar.xz"
+RUN curl -sLo /tmp/signify.txz "https://github.com/aperezdc/signify/releases/download/v31/signify-31.tar.xz"
 RUN tar -xzf /tmp/go.tgz -C /opt
 RUN tar -xzf /tmp/jdk.tgz -C /opt
 RUN mkdir -p /opt/maven && tar -xzf /tmp/maven.tgz -C /opt/maven --strip-components=1
@@ -42,7 +40,6 @@ ARG PROTOC_VER
 ARG PROTOC_GEN_GO_VER
 ARG PROTOC_GEN_GRPC_VER
 ARG JDK_VER
-ARG JDK_PATCH
 ARG MAVEN_VER
 COPY --from=build /opt/go /usr/local/go
 COPY --from=build /opt/protoc /usr/local/

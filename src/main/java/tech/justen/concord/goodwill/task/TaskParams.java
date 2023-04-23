@@ -41,7 +41,7 @@ public class TaskParams {
 
     public static final String GONOSUMDB_KEY = "GONOSUMDB";
 
-    private static final String DEFAULT_GO_VERSION = "1.16.7";
+    private static final String DEFAULT_GO_VERSION = "1.20.3";
 
     private static final String DEFAULT_GO_OS = "linux";
 

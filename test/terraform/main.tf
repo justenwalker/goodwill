@@ -68,7 +68,7 @@ resource "docker_image" "ldap" {
 }
 resource "docker_container" "ldap" {
   name  = "concord-ldap"
-  image = docker_image.ldap.latest
+  image = docker_image.ldap.image_id
   command = [
     "--copy-service",
     "--loglevel",
@@ -112,7 +112,7 @@ resource "docker_image" "postgres" {
 }
 resource "docker_container" "postgres" {
   name  = "concord-postgres"
-  image = docker_image.postgres.latest
+  image = docker_image.postgres.image_id
   env = [
     "POSTGRES_PASSWORD=${var.pg_password}",
   ]
@@ -140,7 +140,7 @@ resource "docker_image" "concord-server" {
 }
 resource "docker_container" "concord-server" {
   name  = "concord-server"
-  image = docker_image.concord-server.latest
+  image = docker_image.concord-server.image_id
   ports {
     internal = 8001
     external = 8001
@@ -178,7 +178,7 @@ resource "docker_image" "concord-agent" {
 }
 resource "docker_container" "concord-agent" {
   name  = "concord-agent"
-  image = docker_image.concord-agent.latest
+  image = docker_image.concord-agent.image_id
   volumes {
     host_path      = local_file.concord-agent-config.filename
     container_path = "/concord.conf"
@@ -214,12 +214,12 @@ resource "docker_container" "concord-agent" {
 
 # --- Docker in docker --- #
 resource "docker_image" "dind" {
-  name         = "docker:stable-dind"
+  name         = "docker:dind"
   keep_locally = true
 }
 resource "docker_container" "dind" {
   name  = "concord-dind"
-  image = docker_image.dind.latest
+  image = docker_image.dind.image_id
   command = [
     "dockerd",
     "-H",

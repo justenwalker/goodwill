@@ -1,3 +1,8 @@
+/*
+ * Copyright 2021, Justen Walker and the goodwill contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package tech.justen.concord.goodwill;
 
 import java.io.IOException;

@@ -86,8 +86,10 @@ func Crypto(ts *gw.Task) error {
 		return fmt.Errorf("decrypt string failed: %w", err)
 	}
 	fmt.Println("Decrypted:", dec)
+	gkpname := fmt.Sprintf("genkp-%s", ts.ProcessID)
+	nkpname := fmt.Sprintf("newkp-%s", ts.ProcessID)
 	fmt.Println("====== Generate Key Pair")
-	kp, err := crypt.GenerateKeyPair(ctx, "gen-keypair", secret.GeneratePassword)
+	kp, err := crypt.GenerateKeyPair(ctx, gkpname, secret.GeneratePassword)
 	if err != nil {
 		return fmt.Errorf("generate keypair %q failed: %w", "gen-keypair", err)
 	}
@@ -95,9 +97,9 @@ func Crypto(ts *gw.Task) error {
 	fmt.Println("PublicKey:", kp.PublicKey)
 	fmt.Println("StorePassword:", kp.StorePassword)
 	fmt.Println("====== Export Key Pair")
-	keypair, err := crypt.KeyPairFiles(ctx, "gen-keypair", secret.StorePassword(kp.StorePassword))
+	keypair, err := crypt.KeyPairFiles(ctx, gkpname, secret.StorePassword(kp.StorePassword))
 	if err != nil {
-		return fmt.Errorf("export keypair %q files failed: %w", "gen-keypair", err)
+		return fmt.Errorf("export keypair %q files failed: %w", gkpname, err)
 	}
 	fmt.Println("Public Key File: ", keypair.PublicKeyFile)
 	fmt.Println("Private Key File: ", keypair.PrivateKeyFile)
@@ -110,7 +112,7 @@ func Crypto(ts *gw.Task) error {
 		return fmt.Errorf("read private key %q  failed: %w", keypair.PrivateKeyFile, err)
 	}
 	fmt.Println("====== Create Key Pair")
-	nkp, err := crypt.CreateKeyPair(ctx, "create-keypair", secret.KeyPair{
+	nkp, err := crypt.CreateKeyPair(ctx, nkpname, secret.KeyPair{
 		PublicKey:  pub,
 		PrivateKey: priv,
 	})
@@ -120,7 +122,7 @@ func Crypto(ts *gw.Task) error {
 	fmt.Println("ID:", nkp.ID)
 	fmt.Println("PublicKey:", nkp.PublicKey)
 	fmt.Println("====== Update Access Level")
-	if err := crypt.UpdateAccess(ctx, "gen-keypair", []secret.AccessEntry{
+	if err := crypt.UpdateAccess(ctx, gkpname, []secret.AccessEntry{
 		{
 			TeamName: gw.DefaultTeamName,
 			OrgName:  gw.DefaultOrgName,
@@ -130,7 +132,7 @@ func Crypto(ts *gw.Task) error {
 		return fmt.Errorf("update gen-keypair access failed: %w", err)
 	}
 	fmt.Println("====== Get Access Level")
-	access, err := crypt.ListAccess(ctx, "gen-keypair")
+	access, err := crypt.ListAccess(ctx, gkpname)
 	if err != nil {
 		return fmt.Errorf("list gen-keypair access failed: %w", err)
 	}
@@ -138,10 +140,10 @@ func Crypto(ts *gw.Task) error {
 		fmt.Printf("- %+v\n", a)
 	}
 	fmt.Println("====== Delete Secrets")
-	if err := crypt.Delete(ctx, "gen-keypair"); err != nil {
+	if err := crypt.Delete(ctx, gkpname); err != nil {
 		return fmt.Errorf("delete gen-keypair failed: %w", err)
 	}
-	if err := crypt.Delete(ctx, "create-keypair"); err != nil {
+	if err := crypt.Delete(ctx, nkpname); err != nil {
 		return fmt.Errorf("delete create-keypair failed: %w", err)
 	}
 	return nil
