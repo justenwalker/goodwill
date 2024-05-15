@@ -1,0 +1,16 @@
+services:
+  protogen:
+    build:
+      context: "."
+    working_dir: "/gosrc"
+    volumes:
+      - "../:/gosrc"
+    command:
+      - bash
+      - -c
+      - >-
+        protoc
+        -I=/gosrc//src/main/proto
+        --go_out=/gosrc --go_opt=module=go.justen.tech/goodwill
+        --go-grpc_out=/gosrc --go-grpc_opt=module=go.justen.tech/goodwill
+        /gosrc/src/main/proto/*.proto
