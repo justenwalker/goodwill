@@ -117,10 +117,10 @@ The files will be placed in `./dist`
 
 ### Running Tests
 
-To run End-to-End tests, you need to install [Terraform](https://www.terraform.io/) and [Docker](https://www.docker.com/)
+To run End-to-End tests, you need to install [OpenTofu](https://opentofu.org/docs/intro/install/) and [Docker](https://www.docker.com/).
 
 ```shell
-mage e2e
+mage e2e:test
 ```
 
 This will bring a local Concord instance up in Docker, and make it available on `http://localhost:8001`

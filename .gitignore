@@ -5,6 +5,8 @@
 
 # Terraform
 .terraform/
+.tofu/
 *.lock.hcl
 *.tfstate
+terraform.tfvars
 *.tfstate.backup

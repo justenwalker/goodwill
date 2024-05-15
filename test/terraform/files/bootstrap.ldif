@@ -1,0 +1,28 @@
+# == Users
+dn: ou=Users,dc=walmartlabs,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: Users
+
+## User: concord-admin
+dn: cn=concord-admin,ou=Users,dc=walmartlabs,dc=com
+cn: concord-admin
+objectClass: top
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+description: Concord Administrator
+userPassword: {SSHA}IY+YzW3SyzL1LRFMaHm5x1SFcDXxTmoC
+
+# == Groups
+dn: ou=Groups,dc=walmartlabs,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: Groups
+
+# Group: concord-admins
+dn: cn=concord-admins,ou=Groups,dc=walmartlabs,dc=com
+cn: concord-admins
+description: Concord Admins
+objectClass: top
+objectClass: groupOfUniqueNames
+uniqueMember: cn=concord-admin,ou=Users,dc=walmartlabs,dc=com

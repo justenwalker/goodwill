@@ -25,12 +25,15 @@ variable "concord_api_key" {
 }
 variable "sonatype_username" {
   type = string
+  default = "SONATYPE_TOKEN_USER"
 }
 variable "sonatype_password" {
   type = string
+  default = "SONATYPE_TOKEN_PASSWORD"
 }
 variable "sonatype_staging_repo" {
   type = string
+  default = "SONATYPE_STAGING_REPO_ID"
 }
 variable "pg_password" {
   type    = string
@@ -42,11 +45,11 @@ variable "ipv4_cidr" {
 }
 variable "ipv6_cidr" {
   type    = string
-  default = "fd3c:abca:1db2:6b1c::/56"
+  default = "fd3c:abca:1db2:6b00::/56"
 }
 variable "concord_version" {
   type    = string
-  default = "1.101.0"
+  default = "2.5.0"
 }
 variable "goprivate" {
   type    = string
