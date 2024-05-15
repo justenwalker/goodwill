@@ -4,10 +4,12 @@
 package value
 
 import (
-	"go.justen.tech/goodwill/internal/pb"
+	"time"
+
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
-	"time"
+
+	"go.justen.tech/goodwill/internal/pb"
 )
 
 type Time struct {

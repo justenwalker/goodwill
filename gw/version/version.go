@@ -5,6 +5,7 @@ package version
 
 import (
 	"fmt"
+
 	"github.com/masterminds/semver"
 )
 

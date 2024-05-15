@@ -5,9 +5,11 @@ package jsonstore
 
 import (
 	"context"
+
+	"google.golang.org/grpc"
+
 	"go.justen.tech/goodwill/gw/taskcontext"
 	"go.justen.tech/goodwill/gw/value"
-	"google.golang.org/grpc"
 )
 
 // Store to access a JSONStore

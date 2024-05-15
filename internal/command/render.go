@@ -5,10 +5,12 @@ package command
 
 import (
 	"fmt"
-	. "github.com/dave/jennifer/jen"
-	"go.justen.tech/goodwill/internal/parse"
 	"io"
 	"strings"
+
+	. "github.com/dave/jennifer/jen"
+
+	"go.justen.tech/goodwill/internal/parse"
 )
 
 const (

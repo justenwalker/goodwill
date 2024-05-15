@@ -5,9 +5,10 @@ package mage
 
 import (
 	"bytes"
+	"testing"
+
 	"github.com/sebdah/goldie/v2"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestGenerateConcordYaml(t *testing.T) {

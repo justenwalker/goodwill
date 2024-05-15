@@ -9,11 +9,13 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"go.justen.tech/goodwill/gw/version"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"io/ioutil"
 	"os"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+
+	"go.justen.tech/goodwill/gw/version"
 )
 
 const (

@@ -5,9 +5,11 @@ package command
 
 import (
 	"bytes"
-	"github.com/sebdah/goldie/v2"
-	"go.justen.tech/goodwill/internal/parse"
 	"testing"
+
+	"github.com/sebdah/goldie/v2"
+
+	"go.justen.tech/goodwill/internal/parse"
 )
 
 func TestRenderMain(t *testing.T) {

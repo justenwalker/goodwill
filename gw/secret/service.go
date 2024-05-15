@@ -5,8 +5,10 @@ package secret
 
 import (
 	"context"
-	"go.justen.tech/goodwill/internal/pb"
+
 	"google.golang.org/grpc"
+
+	"go.justen.tech/goodwill/internal/pb"
 )
 
 // Service that manages concord secrets

@@ -6,10 +6,12 @@ package docker
 import (
 	"context"
 	"fmt"
-	"go.justen.tech/goodwill/internal/pb"
-	"google.golang.org/grpc"
 	"io"
 	"io/ioutil"
+
+	"google.golang.org/grpc"
+
+	"go.justen.tech/goodwill/internal/pb"
 )
 
 type Service struct {

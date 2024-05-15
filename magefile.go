@@ -11,10 +11,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/magefile/mage/mg"
-	"github.com/magefile/mage/sh"
-	"go.justen.tech/goodwill/internal/mage"
-	"golang.org/x/sync/errgroup"
 	"io/ioutil"
 	"log"
 	"os"
@@ -24,6 +20,12 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
+	"golang.org/x/sync/errgroup"
+
+	"go.justen.tech/goodwill/internal/mage"
 )
 
 var Default = Build
@@ -266,7 +268,7 @@ func addGoBinary(artifact mage.Artifact) {
 	goBinaries = append(goBinaries, artifact)
 }
 
-// buildGoBinary builds a Go binary forthe target os/arch
+// buildGoBinary builds a Go binary for the target os/arch
 func buildGoBinary(distDir string, os string, arch string) error {
 	t, err := time.Parse(time.RFC3339, buildTime())
 	if err != nil {
