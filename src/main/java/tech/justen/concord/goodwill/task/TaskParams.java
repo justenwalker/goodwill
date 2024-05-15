@@ -184,7 +184,9 @@ public class TaskParams {
                 case "x86":
                 case "i386":
                     return "386";
-
+                case "arm64":
+                case "aarch64":
+                    return "arm64";
             }
             return DEFAULT_GO_ARCH;
         }

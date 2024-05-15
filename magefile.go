@@ -299,7 +299,9 @@ func buildAllGoBinaries() error {
 	}{
 		{"linux", "amd64"},
 		{"linux", "386"},
+		{"linux", "arm64"},
 		{"darwin", "amd64"},
+		{"darwin", "arm64"},
 		{"windows", "amd64"},
 		{"windows", "386"},
 	} {
