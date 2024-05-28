@@ -18,15 +18,15 @@ func TestGenerateConcordYaml(t *testing.T) {
 	}{
 		{"default", ConcordParams{}},
 		{"dependencies", ConcordParams{Dependencies: true}},
-		{"dependencies-version", ConcordParams{Dependencies: true, Version: "0.4.1"}},
+		{"dependencies-version", ConcordParams{Dependencies: true, Version: "0.6.0"}},
 		{"use-docker", ConcordParams{UseDocker: true}},
-		{"go-version", ConcordParams{GoVersion: "1.16.4"}},
+		{"go-version", ConcordParams{GoVersion: "1.21.0"}},
 
 		{"default-v2", ConcordParams{Runtime: ConcordRuntimeV2}},
 		{"dependencies-v2", ConcordParams{Runtime: ConcordRuntimeV2, Dependencies: true}},
-		{"dependencies-version-v2", ConcordParams{Runtime: ConcordRuntimeV2, Dependencies: true, Version: "0.4.1"}},
+		{"dependencies-version-v2", ConcordParams{Runtime: ConcordRuntimeV2, Dependencies: true, Version: "0.6.0"}},
 		{"use-docker-v2", ConcordParams{Runtime: ConcordRuntimeV2, UseDocker: true}},
-		{"go-version-v2", ConcordParams{Runtime: ConcordRuntimeV2, GoVersion: "1.16.4"}},
+		{"go-version-v2", ConcordParams{Runtime: ConcordRuntimeV2, GoVersion: "1.21.0"}},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

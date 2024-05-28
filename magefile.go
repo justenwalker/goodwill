@@ -506,7 +506,7 @@ func (e E2E) Test() error {
 			"precompiled",
 			mage.ConcordParams{
 				Runtime:   mage.ConcordRuntimeV1,
-				GoVersion: "1.20.3",
+				GoVersion: "1.22.3",
 				UseDocker: true,
 			},
 			[]mage.ZipFile{
@@ -518,7 +518,7 @@ func (e E2E) Test() error {
 			"precompiled-v2",
 			mage.ConcordParams{
 				Runtime:   mage.ConcordRuntimeV2,
-				GoVersion: "1.20.3",
+				GoVersion: "1.22.3",
 				UseDocker: true,
 			},
 			[]mage.ZipFile{

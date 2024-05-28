@@ -5,7 +5,7 @@ configuration:
   arguments:
     goodwillCfg:
       useDocker: false
-      goVersion: "1.17"
+      goVersion: "1.22"
 flows:
   default:
     - checkpoint: "start"
