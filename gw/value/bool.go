@@ -4,9 +4,10 @@
 package value
 
 import (
-	"go.justen.tech/goodwill/internal/pb"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
+
+	"go.justen.tech/goodwill/internal/pb"
 )
 
 type Bool bool

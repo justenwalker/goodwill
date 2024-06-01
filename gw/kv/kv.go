@@ -6,9 +6,11 @@ package kv
 import (
 	"context"
 	"fmt"
+
+	"google.golang.org/grpc"
+
 	"go.justen.tech/goodwill/gw/taskcontext"
 	"go.justen.tech/goodwill/gw/value"
-	"google.golang.org/grpc"
 )
 
 // Service to access the project key value store

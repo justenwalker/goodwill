@@ -9,8 +9,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/magefile/mage/mg"
-	"github.com/magefile/mage/sh"
 	"io"
 	"io/ioutil"
 	"os"
@@ -18,6 +16,9 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
 )
 
 type Artifact struct {

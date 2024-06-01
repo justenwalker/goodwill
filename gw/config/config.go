@@ -5,8 +5,10 @@ package config
 
 import (
 	"context"
-	"go.justen.tech/goodwill/internal/pb"
+
 	"google.golang.org/grpc"
+
+	"go.justen.tech/goodwill/internal/pb"
 )
 
 // Service gets task configuration

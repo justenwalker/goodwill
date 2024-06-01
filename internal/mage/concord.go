@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime"
 	"mime/multipart"
 	"net/http"
@@ -28,8 +27,14 @@ type ConcordEnv struct {
 func NewConcordProcess(ctx context.Context, env ConcordEnv, concordYAML io.Reader, files []ZipFile) (string, error) {
 	var buf bytes.Buffer
 	mpw := multipart.NewWriter(&buf)
-	mpw.WriteField("org", env.Org)
-	mpw.WriteField("project", env.Project)
+	err := mpw.WriteField("org", env.Org)
+	if err != nil {
+		return "", err
+	}
+	err = mpw.WriteField("project", env.Project)
+	if err != nil {
+		return "", err
+	}
 	payload, err := mpw.CreateFormFile("archive", "payload.zip")
 	if err != nil {
 		return "", err
@@ -55,17 +60,17 @@ func NewConcordProcess(ctx context.Context, env ConcordEnv, concordYAML io.Reade
 	if err != nil {
 		return "", fmt.Errorf("could not send http request: %w", err)
 	}
-	defer resp.Body.Close()
-	rbody, err := ioutil.ReadAll(resp.Body)
+	defer closeLogError(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		if err != nil {
 			return "", err
 		}
-		return "", fmt.Errorf("%s: %s", resp.Status, string(rbody))
+		return "", fmt.Errorf("%s: %s", resp.Status, string(body))
 	}
 	var response ConcordProcess
-	if err := json.Unmarshal(rbody, &response); err != nil {
-		return "", fmt.Errorf("could not parse concord response: %w\nresponse:\n%s", err, string(rbody))
+	if err := json.Unmarshal(body, &response); err != nil {
+		return "", fmt.Errorf("could not parse concord response: %w\nresponse:\n%s", err, string(body))
 	}
 	return response.InstanceID, nil
 }
@@ -92,18 +97,18 @@ func GetConcordProcess(ctx context.Context, env ConcordEnv, processID string) (*
 	if err != nil {
 		return nil, fmt.Errorf("could not send http request: %w", err)
 	}
-	defer resp.Body.Close()
-	rbody, err := ioutil.ReadAll(resp.Body)
+	defer closeLogError(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		if err != nil {
 			return nil, err
 		}
-		return nil, fmt.Errorf("%s: %s", resp.Status, string(rbody))
+		return nil, fmt.Errorf("%s: %s", resp.Status, string(body))
 	}
 
 	var response ConcordProcess
-	if err := json.Unmarshal(rbody, &response); err != nil {
-		return nil, fmt.Errorf("could not parse concord response: %w\nresponse:\n%s", err, string(rbody))
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, fmt.Errorf("could not parse concord response: %w\nresponse:\n%s", err, string(body))
 	}
 	return &response, nil
 }
@@ -119,20 +124,20 @@ func ConcordPing(ctx context.Context, env ConcordEnv) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("could not send http request: %w", err)
 	}
-	defer resp.Body.Close()
-	rbody, err := ioutil.ReadAll(resp.Body)
+	defer closeLogError(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		if err != nil {
 			return false, err
 		}
-		return false, fmt.Errorf("%s: %s", resp.Status, string(rbody))
+		return false, fmt.Errorf("%s: %s", resp.Status, string(body))
 	}
 
 	var response struct {
 		OK bool `json:"ok"`
 	}
-	if err := json.Unmarshal(rbody, &response); err != nil {
-		return false, fmt.Errorf("could not parse concord response: %w\nresponse:\n%s", err, string(rbody))
+	if err := json.Unmarshal(body, &response); err != nil {
+		return false, fmt.Errorf("could not parse concord response: %w\nresponse:\n%s", err, string(body))
 	}
 	return response.OK, nil
 }
@@ -173,5 +178,11 @@ func WaitConcordProcess(ctx context.Context, env ConcordEnv, processID string) e
 		case "TIMED_OUT":
 			return errors.New("process timed out")
 		}
+	}
+}
+
+func closeLogError(c io.Closer) {
+	if err := c.Close(); err != nil {
+		debug.Println("close error:", err)
 	}
 }

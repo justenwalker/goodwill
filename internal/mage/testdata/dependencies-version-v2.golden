@@ -3,12 +3,12 @@
 
 configuration:
   dependencies:
-  - mvn://tech.justen.concord:goodwill:0.4.1
+  - mvn://tech.justen.concord:goodwill:0.6.0
   runtime: concord-v2
   arguments:
     goodwillCfg:
       useDocker: false
-      goVersion: "1.17"
+      goVersion: "1.22"
 flows:
   default:
     - checkpoint: "start"

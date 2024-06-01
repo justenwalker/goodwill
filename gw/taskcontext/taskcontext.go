@@ -6,9 +6,11 @@ package taskcontext
 import (
 	"context"
 	"fmt"
+
+	"google.golang.org/grpc"
+
 	"go.justen.tech/goodwill/gw/value"
 	"go.justen.tech/goodwill/internal/pb"
-	"google.golang.org/grpc"
 )
 
 type Service struct {

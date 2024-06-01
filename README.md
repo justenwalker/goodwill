@@ -71,7 +71,7 @@ The `goodwill` task can take several optional `in` parameters.
 - `debug`: Enable debug logging for compilation. (default: `false`)
 
 ### Build
-- `goVersion`: Set the version of Go to install. (Default: `1.20.3`)
+- `goVersion`: Set the version of Go to install. (Default: `1.22.3`)
 - `goDockerImage`: Override the image to use when building a goodwill flow in Docker (Default: `golang:${goVersion}`)
 - `useDocker`: Use a docker image to compile the goodwill binary.
 - `installGo`: If compilation is required and go is not found, install it in the task workspace (Default: `true`)
@@ -117,10 +117,10 @@ The files will be placed in `./dist`
 
 ### Running Tests
 
-To run End-to-End tests, you need to install [Terraform](https://www.terraform.io/) and [Docker](https://www.docker.com/)
+To run End-to-End tests, you need to install [OpenTofu](https://opentofu.org/docs/intro/install/) and [Docker](https://www.docker.com/).
 
 ```shell
-mage e2e
+mage e2e:test
 ```
 
 This will bring a local Concord instance up in Docker, and make it available on `http://localhost:8001`

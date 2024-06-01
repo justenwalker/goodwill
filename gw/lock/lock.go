@@ -5,8 +5,10 @@ package lock
 
 import (
 	"context"
-	"go.justen.tech/goodwill/internal/pb"
+
 	"google.golang.org/grpc"
+
+	"go.justen.tech/goodwill/internal/pb"
 )
 
 // Service manages project locks

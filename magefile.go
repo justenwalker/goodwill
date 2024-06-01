@@ -11,10 +11,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/magefile/mage/mg"
-	"github.com/magefile/mage/sh"
-	"go.justen.tech/goodwill/internal/mage"
-	"golang.org/x/sync/errgroup"
 	"io/ioutil"
 	"log"
 	"os"
@@ -24,16 +20,22 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
+	"golang.org/x/sync/errgroup"
+
+	"go.justen.tech/goodwill/internal/mage"
 )
 
 var Default = Build
 
 var (
-	curDir, _    = filepath.Abs(filepath.Join("."))
-	pubFile      = filepath.Join(curDir, "goodwill.pub")
-	targetDir    = filepath.Join(curDir, "target")
-	testDir      = filepath.Join(curDir, "test")
-	terraformDir = filepath.Join(testDir, "terraform")
+	curDir, _ = filepath.Abs(filepath.Join("."))
+	pubFile   = filepath.Join(curDir, "goodwill.pub")
+	targetDir = filepath.Join(curDir, "target")
+	testDir   = filepath.Join(curDir, "test")
+	tofuDir   = filepath.Join(testDir, "tofu")
 )
 
 var (
@@ -83,7 +85,7 @@ var (
 		}
 		return str, nil
 	})
-	concordData = mage.LoadOnce(filepath.Join(terraformDir, "concord-env.json"))
+	concordData = mage.LoadOnce(filepath.Join(tofuDir, "concord-env.json"))
 )
 
 func mvn(args ...string) error {
@@ -266,7 +268,7 @@ func addGoBinary(artifact mage.Artifact) {
 	goBinaries = append(goBinaries, artifact)
 }
 
-// buildGoBinary builds a Go binary forthe target os/arch
+// buildGoBinary builds a Go binary for the target os/arch
 func buildGoBinary(distDir string, os string, arch string) error {
 	t, err := time.Parse(time.RFC3339, buildTime())
 	if err != nil {
@@ -297,7 +299,9 @@ func buildAllGoBinaries() error {
 	}{
 		{"linux", "amd64"},
 		{"linux", "386"},
+		{"linux", "arm64"},
 		{"darwin", "amd64"},
+		{"darwin", "arm64"},
 		{"windows", "amd64"},
 		{"windows", "386"},
 	} {
@@ -375,13 +379,13 @@ type E2E mg.Namespace
 // E2EUp starts the end to end test environment
 func (e E2E) Up() error {
 	cenv := concordEnv()
-	chdir := "-chdir=" + terraformDir
-	if _, err := os.Stat(filepath.Join(terraformDir, ".terraform")); err != nil {
-		if err := sh.RunV("terraform", chdir, "init"); err != nil {
+	chdir := "-chdir=" + tofuDir
+	if _, err := os.Stat(filepath.Join(tofuDir, ".terraform")); err != nil {
+		if err := sh.RunV("tofu", chdir, "init"); err != nil {
 			return err
 		}
 	}
-	if err := sh.RunV("terraform", chdir, "apply", "-var", "concord_api_key="+cenv.AgentKey, "-auto-approve"); err != nil {
+	if err := sh.RunV("tofu", chdir, "apply", "-var", "concord_api_key="+cenv.AgentKey, "-auto-approve"); err != nil {
 		return err
 	}
 	debug.Println("===> Waiting for Concord")
@@ -392,20 +396,20 @@ func (e E2E) Up() error {
 
 // E2EDown tears down the end to end test environment
 func (e E2E) Down() error {
-	debug.Println("==> destroy terraform environment")
-	if err := sh.RunV("terraform", "-chdir="+terraformDir, "destroy", "-auto-approve"); err != nil {
+	debug.Println("==> destroy tofu environment")
+	if err := sh.RunV("tofu", "-chdir="+tofuDir, "destroy", "-auto-approve"); err != nil {
 		return err
 	}
-	debug.Println("==> cleanup terraform files")
+	debug.Println("==> cleanup tofu files")
 	cleanFiles := []string{
-		filepath.Join(terraformDir, ".terraform"),
-		filepath.Join(terraformDir, ".terraform.lock.hcl"),
-		filepath.Join(terraformDir, "terraform.tfstate"),
-		filepath.Join(terraformDir, "terraform.tfstate.backup"),
-		filepath.Join(terraformDir, "files", "maven.json"),
-		filepath.Join(terraformDir, "files", "bootstrap.ldif"),
-		filepath.Join(terraformDir, "files", "concord-agent.conf"),
-		filepath.Join(terraformDir, "files", "concord-server.conf"),
+		filepath.Join(tofuDir, ".terraform"),
+		filepath.Join(tofuDir, ".terraform.lock.hcl"),
+		filepath.Join(tofuDir, "terraform.tfstate"),
+		filepath.Join(tofuDir, "terraform.tfstate.backup"),
+		filepath.Join(tofuDir, "files", "maven.json"),
+		filepath.Join(tofuDir, "files", "bootstrap.ldif"),
+		filepath.Join(tofuDir, "files", "concord-agent.conf"),
+		filepath.Join(tofuDir, "files", "concord-server.conf"),
 	}
 	for _, dir := range cleanFiles {
 		if err := sh.Rm(dir); err != nil {
@@ -424,6 +428,7 @@ func vendorTestFlow() error {
 }
 
 func precompileTestFlow() error {
+	debug.Println("==> precompileTestFlow")
 	mg.Deps(Bin)
 	return sh.RunV(localBin(), "-debug", "-os", "linux", "-arch", "amd64", "-dir", filepath.Join(testDir, "flow"), "-out", filepath.Join(testDir, "flow", "goodwill.tasks"))
 }
@@ -467,14 +472,14 @@ func (e E2E) TestPublished() error {
 
 // E2ETest runs end to end tests
 func (e E2E) Test() error {
-	mg.Deps(Build, e.Up, e2eDeps)
+	mg.SerialDeps(Build, e.Up, e2eDeps)
 	jar := filepath.Join(distDir(), uberJar.String())
 	tests := []e2eTest{
 		{
 			"compiled",
 			mage.ConcordParams{
 				Runtime:   mage.ConcordRuntimeV1,
-				GoVersion: "1.20.3",
+				GoVersion: "1.22.3",
 				UseDocker: true,
 			},
 			[]mage.ZipFile{
@@ -489,7 +494,7 @@ func (e E2E) Test() error {
 			"compiled-v2",
 			mage.ConcordParams{
 				Runtime:   mage.ConcordRuntimeV2,
-				GoVersion: "1.20.3",
+				GoVersion: "1.22.3",
 				UseDocker: true,
 			},
 			[]mage.ZipFile{
@@ -504,7 +509,7 @@ func (e E2E) Test() error {
 			"precompiled",
 			mage.ConcordParams{
 				Runtime:   mage.ConcordRuntimeV1,
-				GoVersion: "1.20.3",
+				GoVersion: "1.22.3",
 				UseDocker: true,
 			},
 			[]mage.ZipFile{
@@ -516,7 +521,7 @@ func (e E2E) Test() error {
 			"precompiled-v2",
 			mage.ConcordParams{
 				Runtime:   mage.ConcordRuntimeV2,
-				GoVersion: "1.20.3",
+				GoVersion: "1.22.3",
 				UseDocker: true,
 			},
 			[]mage.ZipFile{

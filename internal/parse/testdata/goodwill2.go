@@ -1,6 +1,7 @@
 // Copyright 2021, Justen Walker
 // SPDX-License-Identifier: Apache-2.0
 
+//go:build goodwill
 // +build goodwill
 
 package main

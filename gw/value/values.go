@@ -6,10 +6,12 @@ package value
 import (
 	"encoding/json"
 	"fmt"
-	"go.justen.tech/goodwill/internal/pb"
+	"time"
+
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
-	"time"
+
+	"go.justen.tech/goodwill/internal/pb"
 )
 
 type Value interface {

@@ -1,6 +1,7 @@
 // Copyright 2021, Justen Walker
 // SPDX-License-Identifier: Apache-2.0
 
+//go:build goodwill
 // +build goodwill
 
 package main
@@ -9,13 +10,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"time"
+
 	"go.justen.tech/goodwill/gw"
 	"go.justen.tech/goodwill/gw/docker"
 	"go.justen.tech/goodwill/gw/secret"
 	"go.justen.tech/goodwill/gw/value"
-	"io/ioutil"
-	"os"
-	"time"
 )
 
 // Default is a flow that prints the working directory

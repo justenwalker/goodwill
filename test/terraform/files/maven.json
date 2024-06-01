@@ -1,0 +1,18 @@
+{
+  "repositories": [
+    {
+      "id": "sonatype-staging",
+      "layout": "default",
+      "auth": {
+        "username": "justenwalker",
+        "password": "nD#c6FYe3&z6XpMAnW3m"
+      },
+      "url": "https://s01.oss.sonatype.org/content/repositories/staging/"
+    },
+    {
+      "id": "sonatype-public",
+      "layout": "default",
+      "url": "https://s01.oss.sonatype.org/content/groups/public/"
+    }
+  ]
+}

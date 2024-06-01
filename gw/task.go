@@ -6,6 +6,9 @@ package gw
 import (
 	"context"
 	"fmt"
+
+	"google.golang.org/grpc"
+
 	"go.justen.tech/goodwill/gw/config"
 	"go.justen.tech/goodwill/gw/docker"
 	"go.justen.tech/goodwill/gw/jsonstore"
@@ -14,7 +17,6 @@ import (
 	"go.justen.tech/goodwill/gw/secret"
 	"go.justen.tech/goodwill/gw/taskcontext"
 	"go.justen.tech/goodwill/gw/value"
-	"google.golang.org/grpc"
 )
 
 // newTask creates a new Task connection between the client and the GRPC service on the agent

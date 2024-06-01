@@ -5,12 +5,13 @@ package command
 
 import (
 	"fmt"
-	"go.justen.tech/goodwill/internal/parse"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
+
+	"go.justen.tech/goodwill/internal/parse"
 )
 
 type VersionInfo struct {

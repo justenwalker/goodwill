@@ -18,7 +18,7 @@ const (
 	ConcordRuntimeV2
 )
 
-const DefaultGoVersion = "1.17"
+const DefaultGoVersion = "1.22"
 
 type ConcordParams struct {
 	Dependencies bool
