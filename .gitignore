@@ -10,3 +10,6 @@
 *.tfstate
 terraform.tfvars
 *.tfstate.backup
+
+# POM
+pom.xml.versionsBackup
