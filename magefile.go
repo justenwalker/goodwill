@@ -206,7 +206,7 @@ func (m Nexus) Release(stagingID string) error {
 
 func (m Nexus) Drop(stagingID string) error {
 	debug.Println("==> drop staging release")
-	return mvn("nexus-staging:release", "-P", "release", "-DstagingRepositoryId="+stagingID)
+	return mvn("nexus-staging:drop", "-P", "release", "-DstagingRepositoryId="+stagingID)
 }
 
 func sign() error {
