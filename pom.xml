@@ -11,7 +11,7 @@
 
     <groupId>tech.justen.concord</groupId>
     <artifactId>goodwill</artifactId>
-    <version>0.7.0</version>
+    <version>0.7.1-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Goodwill is a plugin for Walmart Labs Concord. It provides a way to write tasks in Go by providing a
