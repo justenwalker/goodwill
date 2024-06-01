@@ -94,7 +94,14 @@ func mvn(args ...string) error {
 		fmt.Sprintf("-Dbuild.gitCommit=%s", gitCommit()),
 		fmt.Sprintf("-Dbuild.timestamp=%s", buildTime()),
 	)
-	return sh.RunV("mvn", args...)
+	return sh.RunWithV(map[string]string{
+		"MAVEN_OPTS": strings.Join([]string{
+			"--add-opens=java.base/java.util=ALL-UNNAMED",
+			"--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
+			"--add-opens=java.base/java.text=ALL-UNNAMED",
+			"--add-opens=java.desktop/java.awt.font=ALL-UNNAMED",
+		}, " "),
+	}, "mvn", args...)
 }
 
 var debug = log.New(os.Stderr, "", 0)
