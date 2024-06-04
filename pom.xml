@@ -44,7 +44,7 @@
         <concord.version>2.5.0</concord.version>
         <protobuf.version>3.25.3</protobuf.version>
         <grpc.version>1.64.0</grpc.version>
-        <apache.commons-compress.version>1.26.1</apache.commons-compress.version>
+        <apache.commons-compress.version>1.26.2</apache.commons-compress.version>
         <guava.version>33.2.1-jre</guava.version>
         <junit.version>4.13.2</junit.version>
         <httpclient.version>4.5.14</httpclient.version>
