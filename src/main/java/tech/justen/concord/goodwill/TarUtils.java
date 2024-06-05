@@ -10,7 +10,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.zip.GZIPInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,19 +18,24 @@ public class TarUtils {
 
   private static final Logger log = LoggerFactory.getLogger(TarUtils.class);
 
+  @SuppressWarnings("ResultOfMethodCallIgnored")
+  private static void makeAllDirs(File file) {
+    file.mkdirs();
+  }
+
   public static void extractTarball(Path tarBall, Path out) throws IOException {
     try (FileInputStream fis = new FileInputStream(tarBall.toFile())) {
       try (GZIPInputStream gzip = new GZIPInputStream(fis)) {
         try (TarArchiveInputStream tar = new TarArchiveInputStream(gzip)) {
           TarArchiveEntry entry;
-          while ((entry = (TarArchiveEntry) tar.getNextEntry()) != null) {
+          while ((entry = tar.getNextEntry()) != null) {
             final File outputFile = new File(out.toFile(), entry.getName());
             if (entry.isDirectory()) {
               if (!outputFile.exists()) {
-                outputFile.mkdirs();
+                makeAllDirs(outputFile);
               }
             } else {
-              outputFile.getParentFile().mkdirs();
+              makeAllDirs(outputFile.getParentFile());
               log.debug("tar.gz extract {} => {}", entry.getName(), outputFile);
               try (OutputStream outputFileStream = new FileOutputStream(outputFile)) {
                 IOUtils.copy(tar, outputFileStream);
