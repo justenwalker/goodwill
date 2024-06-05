@@ -8,5 +8,5 @@ import java.net.URI;
 import java.nio.file.Path;
 
 public interface DependencyManager {
-    Path resolve(URI uri) throws IOException;
+  Path resolve(URI uri) throws IOException;
 }

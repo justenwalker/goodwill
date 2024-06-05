@@ -6,9 +6,10 @@ package tech.justen.concord.goodwill;
 import java.io.IOException;
 
 public interface DockerService {
-    int start(DockerContainer container, LogCallback outCallback, LogCallback errCallback) throws IOException, InterruptedException;
+  int start(DockerContainer container, LogCallback outCallback, LogCallback errCallback)
+      throws IOException, InterruptedException;
 
-    interface LogCallback {
-        void onLog(String line);
-    }
+  interface LogCallback {
+    void onLog(String line);
+  }
 }

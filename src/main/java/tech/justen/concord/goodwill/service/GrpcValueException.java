@@ -4,7 +4,7 @@
 package tech.justen.concord.goodwill.service;
 
 public class GrpcValueException extends UnsupportedOperationException {
-    public GrpcValueException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public GrpcValueException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

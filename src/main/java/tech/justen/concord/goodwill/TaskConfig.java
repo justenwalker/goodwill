@@ -6,21 +6,21 @@ package tech.justen.concord.goodwill;
 import java.nio.file.Path;
 
 public interface TaskConfig {
-    String processId();
+  String processId();
 
-    Path workingDirectory();
+  Path workingDirectory();
 
-    String orgName();
+  String orgName();
 
-    String orgId();
+  String orgId();
 
-    String projectName();
+  String projectName();
 
-    String projectId();
+  String projectId();
 
-    String repoName();
+  String repoName();
 
-    String repoId();
+  String repoId();
 
-    String repoUrl();
+  String repoUrl();
 }

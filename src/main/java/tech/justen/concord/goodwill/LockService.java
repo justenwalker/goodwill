@@ -4,7 +4,7 @@
 package tech.justen.concord.goodwill;
 
 public interface LockService {
-    void projectLock(String name) throws Exception;
+  void projectLock(String name) throws Exception;
 
-    void projectUnlock(String name) throws Exception;
+  void projectUnlock(String name) throws Exception;
 }

@@ -11,35 +11,37 @@ import tech.justen.concord.goodwill.grpc.LockProto;
 import tech.justen.concord.goodwill.grpc.LockServiceGrpc;
 
 public class GrpcLockService extends LockServiceGrpc.LockServiceImplBase {
-    private static final Logger log = LoggerFactory.getLogger(GrpcLockService.class);
+  private static final Logger log = LoggerFactory.getLogger(GrpcLockService.class);
 
-    private final LockService lockService;
+  private final LockService lockService;
 
-    public GrpcLockService(LockService lockService) {
-        this.lockService = lockService;
+  public GrpcLockService(LockService lockService) {
+    this.lockService = lockService;
+  }
+
+  @Override
+  public void projectLock(
+      LockProto.Lock request, StreamObserver<LockProto.LockResult> responseObserver) {
+    try {
+      lockService.projectLock(request.getName());
+      responseObserver.onNext(LockProto.LockResult.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Exception ex) {
+      log.error("GrpcLockService: projectLock failed", ex);
+      responseObserver.onError(GrpcUtils.toStatusException(ex));
     }
+  }
 
-    @Override
-    public void projectLock(LockProto.Lock request, StreamObserver<LockProto.LockResult> responseObserver) {
-        try {
-            lockService.projectLock(request.getName());
-            responseObserver.onNext(LockProto.LockResult.newBuilder().build());
-            responseObserver.onCompleted();
-        } catch (Exception ex) {
-            log.error("GrpcLockService: projectLock failed", ex);
-            responseObserver.onError(GrpcUtils.toStatusException(ex));
-        }
+  @Override
+  public void projectUnlock(
+      LockProto.Lock request, StreamObserver<LockProto.LockResult> responseObserver) {
+    try {
+      lockService.projectUnlock(request.getName());
+      responseObserver.onNext(LockProto.LockResult.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Exception ex) {
+      log.error("GrpcLockService: projectUnlock failed", ex);
+      responseObserver.onError(GrpcUtils.toStatusException(ex));
     }
-
-    @Override
-    public void projectUnlock(LockProto.Lock request, StreamObserver<LockProto.LockResult> responseObserver) {
-        try {
-            lockService.projectUnlock(request.getName());
-            responseObserver.onNext(LockProto.LockResult.newBuilder().build());
-            responseObserver.onCompleted();
-        } catch (Exception ex) {
-            log.error("GrpcLockService: projectUnlock failed", ex);
-            responseObserver.onError(GrpcUtils.toStatusException(ex));
-        }
-    }
+  }
 }

@@ -7,22 +7,22 @@ import com.walmartlabs.concord.sdk.Context;
 import tech.justen.concord.goodwill.LockService;
 
 public class LockServiceImpl implements LockService {
-    private final Context ctx;
+  private final Context ctx;
 
-    private final com.walmartlabs.concord.sdk.LockService lockService;
+  private final com.walmartlabs.concord.sdk.LockService lockService;
 
-    public LockServiceImpl(Context ctx, com.walmartlabs.concord.sdk.LockService lockService) {
-        this.ctx = ctx;
-        this.lockService = lockService;
-    }
+  public LockServiceImpl(Context ctx, com.walmartlabs.concord.sdk.LockService lockService) {
+    this.ctx = ctx;
+    this.lockService = lockService;
+  }
 
-    @Override
-    public void projectLock(String name) throws Exception {
-        lockService.projectLock(ctx, name);
-    }
+  @Override
+  public void projectLock(String name) throws Exception {
+    lockService.projectLock(ctx, name);
+  }
 
-    @Override
-    public void projectUnlock(String name) throws Exception {
-        lockService.projectUnlock(ctx, name);
-    }
+  @Override
+  public void projectUnlock(String name) throws Exception {
+    lockService.projectUnlock(ctx, name);
+  }
 }

@@ -7,13 +7,13 @@ import java.util.Set;
 
 public interface ContextService {
 
-    Set<String> getVariableNames();
+  Set<String> getVariableNames();
 
-    Object getVariable(String name);
+  Object getVariable(String name);
 
-    void setVariable(String name, Object value);
+  void setVariable(String name, Object value);
 
-    <T> T getSetting(String name, T defaultValue, Class<T> type);
+  <T> T getSetting(String name, T defaultValue, Class<T> type);
 
-    <T> T evaluate(String expr, Class<T> type);
+  <T> T evaluate(String expr, Class<T> type);
 }
