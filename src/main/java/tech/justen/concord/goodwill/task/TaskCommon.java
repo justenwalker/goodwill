@@ -6,8 +6,10 @@ package tech.justen.concord.goodwill.task;
 import com.walmartlabs.concord.ApiClient;
 import com.walmartlabs.concord.client.ApiClientConfiguration;
 import com.walmartlabs.concord.client.ApiClientFactory;
+import io.grpc.Grpc;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.TlsServerCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.justen.concord.goodwill.*;
@@ -209,8 +211,7 @@ public class TaskCommon {
                 Thread.sleep(sleepMillis);
                 try {
                     port = randomPort();
-                    server = ServerBuilder.forPort(port)
-                            .useTransportSecurity(caCert, caKey)
+                    server = Grpc.newServerBuilderForPort(port,TlsServerCredentials.create(caCert,caKey))
                             .addService(new GrpcDockerService(dockerService))
                             .addService(new GrpcConfigService(apiClientConfig, config))
                             .addService(new GrpcContextService(contextService, taskResult))
