@@ -7,8 +7,8 @@ configuration:
     jvm:
       extraArgs:
         - "-Xdebug"
-        - "-DlogLevel=DEBUG"
         - "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006"
+        - "-Dlogback.configurationFile=v1_logback.xml"
 {{- if .Dependencies }}
 {{- if .Version }}
   dependencies:
