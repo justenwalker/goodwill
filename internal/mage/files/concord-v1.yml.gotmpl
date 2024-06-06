@@ -2,6 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 configuration:
+  debug: true
+  requirements:
+    jvm:
+      extraArgs:
+        - "-Xdebug"
+        - "-DlogLevel=DEBUG"
+        - "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006"
 {{- if .Dependencies }}
 {{- if .Version }}
   dependencies:
