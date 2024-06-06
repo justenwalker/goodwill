@@ -3,7 +3,7 @@
 
 package tech.justen.concord.goodwill.service;
 
-import com.walmartlabs.concord.client.ApiClientConfiguration;
+import com.walmartlabs.concord.client2.ApiClient;
 import io.grpc.stub.StreamObserver;
 import tech.justen.concord.goodwill.TaskConfig;
 import tech.justen.concord.goodwill.grpc.ConfigProto.*;
@@ -13,11 +13,14 @@ public class GrpcConfigService extends ConfigServiceGrpc.ConfigServiceImplBase {
 
   private final TaskConfig taskConfig;
 
-  private final ApiClientConfiguration apiClientConfig;
+  private final ApiClient apiClient;
 
-  public GrpcConfigService(ApiClientConfiguration apiClientConfig, TaskConfig taskConfig) {
-    this.apiClientConfig = apiClientConfig;
+  private final String sessionToken;
+
+  public GrpcConfigService(ApiClient apiClient, TaskConfig taskConfig, String sessionToken) {
+    this.apiClient = apiClient;
     this.taskConfig = taskConfig;
+    this.sessionToken = sessionToken;
   }
 
   @Override
@@ -29,8 +32,8 @@ public class GrpcConfigService extends ConfigServiceGrpc.ConfigServiceImplBase {
             .setWorkingDirectory(taskConfig.workingDirectory().toString())
             .setApiConfiguration(
                 APIConfiguration.newBuilder()
-                    .setBaseURL(apiClientConfig.baseUrl())
-                    .setSessionToken(apiClientConfig.sessionToken())
+                    .setBaseURL(apiClient.getBaseUrl())
+                    .setSessionToken(sessionToken)
                     .build())
             .setProjectInfo(
                 ProjectInfo.newBuilder()

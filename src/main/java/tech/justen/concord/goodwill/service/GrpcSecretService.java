@@ -3,20 +3,24 @@
 
 package tech.justen.concord.goodwill.service;
 
-import com.squareup.okhttp.Call;
-import com.walmartlabs.concord.ApiClient;
-import com.walmartlabs.concord.ApiException;
-import com.walmartlabs.concord.ApiResponse;
-import com.walmartlabs.concord.client.*;
-import com.walmartlabs.concord.client.SecretOperationResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.walmartlabs.concord.client2.*;
+import com.walmartlabs.concord.client2.impl.HttpEntity;
+import com.walmartlabs.concord.client2.impl.MultipartRequestBodyHandler;
+import com.walmartlabs.concord.client2.impl.ResponseBodyHandler;
+import com.walmartlabs.concord.sdk.Constants;
 import io.grpc.stub.StreamObserver;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.justen.concord.goodwill.SecretService;
 import tech.justen.concord.goodwill.TaskConfig;
 import tech.justen.concord.goodwill.grpc.SecretServiceGrpc;
-import tech.justen.concord.goodwill.grpc.SecretsProto;
 import tech.justen.concord.goodwill.grpc.SecretsProto.*;
 
 public class GrpcSecretService extends SecretServiceGrpc.SecretServiceImplBase {
@@ -29,25 +33,22 @@ public class GrpcSecretService extends SecretServiceGrpc.SecretServiceImplBase {
 
   private final ApiClient apiClient;
 
+  private final SecretClient secretClient;
+
   public GrpcSecretService(
       TaskConfig taskConfig, SecretService secretService, ApiClient apiClient) {
     this.taskConfig = taskConfig;
     this.secretService = secretService;
     this.apiClient = apiClient;
+    this.secretClient = new SecretClient(apiClient);
   }
 
   @Override
   public void createKeyPair(
       CreateKeyPairRequest request, StreamObserver<CreateKeyPairResponse> responseObserver) {
     try {
-      SecretParams opts = request.getOptions();
-      Map<String, Object> requestBody = createRequestBody(opts);
-      requestBody.put("type", "key_pair");
-      requestBody.put("private", request.getPrivateKey().toStringUtf8());
-      requestBody.put("public", request.getPublicKey().toStringUtf8());
-      ApiResponse<PublicKeyResponse> resp =
-          create(opts.getOrgName(), requestBody, PublicKeyResponse.class);
-      responseObserver.onNext(keyPairResponse(resp.getData()));
+      CreateKeyPairResponse response = createKeyPairRaw(request);
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Exception e) {
       log.error("GrpcSecretService: createKeyPair failed", e);
@@ -59,12 +60,9 @@ public class GrpcSecretService extends SecretServiceGrpc.SecretServiceImplBase {
   public void generateKeyPair(
       SecretParams request, StreamObserver<CreateKeyPairResponse> responseObserver) {
     try {
-      SecretParams opts = request;
-      Map<String, Object> requestBody = createRequestBody(opts);
-      requestBody.put("type", "key_pair");
-      ApiResponse<PublicKeyResponse> resp =
-          create(opts.getOrgName(), requestBody, PublicKeyResponse.class);
-      responseObserver.onNext(keyPairResponse(resp.getData()));
+      CreateKeyPairResponse response =
+          createKeyPairRaw(CreateKeyPairRequest.newBuilder().setOptions(request).build());
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Exception e) {
       log.error("GrpcSecretService: generateKeyPair failed", e);
@@ -77,14 +75,12 @@ public class GrpcSecretService extends SecretServiceGrpc.SecretServiceImplBase {
       CreateUsernamePasswordRequest request,
       StreamObserver<CreateSecretResponse> responseObserver) {
     try {
-      SecretParams opts = request.getOptions();
-      Map<String, Object> requestBody = createRequestBody(opts);
-      requestBody.put("type", "username_password");
-      requestBody.put("username", request.getUsername());
-      requestBody.put("password", request.getPassword());
-      ApiResponse<SecretOperationResponse> resp =
-          create(opts.getOrgName(), requestBody, SecretOperationResponse.class);
-      responseObserver.onNext(secretResponse(resp.getData()));
+      ImmutableCreateSecretRequest.Builder requestBuilder =
+          createSecretRequestBuilder(request.getOptions());
+      requestBuilder.usernamePassword(
+          CreateSecretRequest.UsernamePassword.of(request.getUsername(), request.getPassword()));
+      SecretOperationResponse response = secretClient.createSecret(requestBuilder.build());
+      responseObserver.onNext(secretResponse(response));
       responseObserver.onCompleted();
     } catch (Exception e) {
       log.error("GrpcSecretService: createUsernamePassword failed", e);
@@ -96,13 +92,11 @@ public class GrpcSecretService extends SecretServiceGrpc.SecretServiceImplBase {
   public void createSecretValue(
       CreateSecretValueRequest request, StreamObserver<CreateSecretResponse> responseObserver) {
     try {
-      SecretParams opts = request.getOptions();
-      Map<String, Object> requestBody = createRequestBody(opts);
-      requestBody.put("type", "data");
-      requestBody.put("data", request.getValue().toByteArray());
-      ApiResponse<SecretOperationResponse> resp =
-          create(opts.getOrgName(), requestBody, SecretOperationResponse.class);
-      responseObserver.onNext(secretResponse(resp.getData()));
+      ImmutableCreateSecretRequest.Builder requestBuilder =
+          createSecretRequestBuilder(request.getOptions());
+      requestBuilder.data(request.getValue().toByteArray());
+      SecretOperationResponse response = secretClient.createSecret(requestBuilder.build());
+      responseObserver.onNext(secretResponse(response));
       responseObserver.onCompleted();
     } catch (Exception e) {
       log.error("GrpcSecretService: createSecretValue failed", e);
@@ -151,12 +145,12 @@ public class GrpcSecretService extends SecretServiceGrpc.SecretServiceImplBase {
 
       SecretsApi secretsApi = new SecretsApi(apiClient);
       List<ResourceAccessEntry> levels = new ArrayList<>();
-      for (SecretsProto.AccessEntry entry : request.getEntriesList()) {
+      for (AccessEntry entry : request.getEntriesList()) {
         ResourceAccessEntry e = new ResourceAccessEntry();
         if (!entry.getTeamID().isEmpty()) {
           e.setTeamId(UUID.fromString(entry.getTeamID()));
         } else {
-          TeamEntry team = teamsApi.get(entry.getOrgName(), entry.getTeamName());
+          TeamEntry team = teamsApi.getTeam(entry.getOrgName(), entry.getTeamName());
           e.setTeamId(team.getId());
         }
         switch (entry.getLevel()) {
@@ -169,8 +163,8 @@ public class GrpcSecretService extends SecretServiceGrpc.SecretServiceImplBase {
         }
         levels.add(e);
       }
-      GenericOperationResult result =
-          secretsApi.updateAccessLevel_0(getOrg(request.getOrgName()), request.getName(), levels);
+      secretsApi.updateSecretAccessLevelBulk(
+          getOrg(request.getOrgName()), request.getName(), levels);
       responseObserver.onNext(SecretResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (ApiException e) {
@@ -186,7 +180,7 @@ public class GrpcSecretService extends SecretServiceGrpc.SecretServiceImplBase {
     try {
       SecretsApi secretsApi = new SecretsApi(apiClient);
       List<ResourceAccessEntry> levels =
-          secretsApi.getAccessLevel(request.getOrgName(), request.getName());
+          secretsApi.getSecretAccessLevel(request.getOrgName(), request.getName());
       ListAccessEntryResponse.Builder resp = ListAccessEntryResponse.newBuilder();
       for (ResourceAccessEntry entry : levels) {
         AccessEntry.Builder entryBuilder = AccessEntry.newBuilder();
@@ -321,45 +315,125 @@ public class GrpcSecretService extends SecretServiceGrpc.SecretServiceImplBase {
     return builder.build();
   }
 
-  private <T> ApiResponse<T> create(
-      String org, Map<String, Object> requestBody, Class<T> responseType) throws ApiException {
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put("Content-Type", "multipart/form-data");
-    if (org.isEmpty()) {
-      org = taskConfig.orgName();
-    }
-    String url = String.format("/api/v1/org/%s/secret", org);
-    String[] authNames = new String[] {"session_key", "api_key"};
-    Call apiCall =
-        apiClient.buildCall(
-            url, "POST", null, null, null, headerParams, requestBody, authNames, null);
-    return apiClient.execute(apiCall, responseType);
-  }
+  private static final TypeReference<PublicKeyResponse> PUBLIC_KEY_RESPONSE =
+      new TypeReference<PublicKeyResponse>() {};
 
-  private Map<String, Object> createRequestBody(SecretParams opts) {
-    Map<String, Object> requestBody = new HashMap<>();
-    requestBody.put("name", opts.getName());
+  /**
+   * Creates a keypair secret with raw bytes. The builder only allows KeyPairs to be provided as
+   * files on the filesystem; so in order to avoid temporary files, this needs to do a manual api
+   * call using the bytes from CreateKeyPairRequest.
+   *
+   * @param request is a CreateKeyPairRequest to create the KeyPair secret.
+   * @return CreateKeyPairResponse from the API
+   * @throws ApiException when it encounters an API Error
+   */
+  private CreateKeyPairResponse createKeyPairRaw(CreateKeyPairRequest request) throws ApiException {
+    SecretParams opts = request.getOptions();
+    String orgName = opts.getOrgName();
+    if (orgName.isBlank()) {
+      orgName = taskConfig.orgName();
+    }
+    Map<String, Object> params = new HashMap<>();
+    params.put(Constants.Multipart.NAME, opts.getName());
+    params.put(Constants.Multipart.GENERATE_PASSWORD, opts.getGeneratePassword());
+    String storePassword = opts.getStorePassword();
+    if (!storePassword.isEmpty()) {
+      params.put(Constants.Multipart.STORE_PASSWORD, storePassword);
+    }
+    switch (opts.getVisibility()) {
+      case PRIVATE:
+        params.put(Constants.Multipart.VISIBILITY, SecretEntryV2.VisibilityEnum.PRIVATE.getValue());
+        break;
+      case PUBLIC:
+        params.put(Constants.Multipart.VISIBILITY, SecretEntryV2.VisibilityEnum.PUBLIC.getValue());
+        break;
+    }
     String project = opts.getProject();
     if (!project.isEmpty()) {
-      requestBody.put("project", project);
+      params.put(Constants.Multipart.PROJECT_NAMES, project);
+    }
+    params.put(Constants.Multipart.TYPE, SecretEntryV2.TypeEnum.KEY_PAIR.getValue());
+    if (!request.getPrivateKey().isEmpty() && !request.getPublicKey().isEmpty()) {
+      params.put(Constants.Multipart.PUBLIC, request.getPublicKey().toByteArray());
+      params.put(Constants.Multipart.PRIVATE, request.getPrivateKey().toByteArray());
+    }
+    HttpRequest.Builder requestBuilder = apiClient.requestBuilder();
+    String createSecretPath =
+        "/api/v1/org/{orgName}/secret".replace("{orgName}", ApiClient.urlEncode(orgName));
+    requestBuilder.uri(URI.create(apiClient.getBaseUri() + createSecretPath));
+    requestBuilder.header(
+        "Accept", "application/json,application/vnd.siesta-validation-errors-v1+json");
+    HttpEntity entity = MultipartRequestBodyHandler.handle(apiClient.getObjectMapper(), params);
+    requestBuilder
+        .header("Content-Type", entity.contentType().toString())
+        .method(
+            "POST",
+            HttpRequest.BodyPublishers.ofInputStream(
+                () -> {
+                  try {
+                    return entity.getContent();
+                  } catch (IOException e) {
+                    throw new RuntimeException(e);
+                  }
+                }));
+    try {
+      HttpResponse<InputStream> response =
+          apiClient
+              .getHttpClient()
+              .send(requestBuilder.build(), HttpResponse.BodyHandlers.ofInputStream());
+      if (response.statusCode() / 100 != 2) {
+        try (InputStream body = response.body()) {
+          String bodyString = body == null ? null : new String(body.readAllBytes());
+          String message =
+              formatExceptionMessage("createSecret", response.statusCode(), bodyString);
+          throw new ApiException(response.statusCode(), message, response.headers(), bodyString);
+        }
+      }
+      return keyPairResponse(
+          ResponseBodyHandler.handle(apiClient.getObjectMapper(), response, PUBLIC_KEY_RESPONSE));
+    } catch (IOException e) {
+      throw new ApiException(e);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new ApiException(e);
+    }
+  }
+
+  private ImmutableCreateSecretRequest.Builder createSecretRequestBuilder(SecretParams opts) {
+    ImmutableCreateSecretRequest.Builder requestBuilder = CreateSecretRequest.builder();
+    requestBuilder.name(opts.getName());
+    requestBuilder.org(opts.getOrgName());
+    if (opts.getOrgName().isBlank()) {
+      requestBuilder.org(taskConfig.orgName());
+    }
+    String project = opts.getProject();
+    if (!project.isEmpty()) {
+      requestBuilder.addProjectNames(project);
     }
     switch (opts.getVisibility()) {
       case PUBLIC:
-        requestBody.put("visibility", "PUBLIC");
+        requestBuilder.visibility(SecretEntryV2.VisibilityEnum.PUBLIC);
       case PRIVATE:
-        requestBody.put("visibility", "PRIVATE");
+        requestBuilder.visibility(SecretEntryV2.VisibilityEnum.PRIVATE);
     }
     if (opts.getGeneratePassword()) {
-      requestBody.put("generatePassword", "true");
+      requestBuilder.generatePassword(true);
     }
     String storePassword = opts.getStorePassword();
     if (!storePassword.isEmpty()) {
-      requestBody.put("storePassword", storePassword);
+      requestBuilder.storePassword(storePassword);
     }
-    return requestBody;
+    return requestBuilder;
   }
 
   private static boolean isSet(String str) {
     return str != null && !str.isEmpty();
+  }
+
+  private static String formatExceptionMessage(String operationId, int statusCode, String body) {
+    if (body == null || body.isEmpty()) {
+      body = "[no body]";
+    }
+    return operationId + " call failed with: " + statusCode + " - " + body;
   }
 }

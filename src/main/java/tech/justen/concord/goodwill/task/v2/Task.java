@@ -5,11 +5,11 @@ package tech.justen.concord.goodwill.task.v2;
 
 import static tech.justen.concord.goodwill.task.TaskParams.*;
 
-import com.walmartlabs.concord.client.ApiClientConfiguration;
-import com.walmartlabs.concord.client.ApiClientFactory;
-import com.walmartlabs.concord.runtime.v2.sdk.*;
+import com.walmartlabs.concord.client2.ApiClient;
 import com.walmartlabs.concord.runtime.v2.sdk.Context;
 import com.walmartlabs.concord.runtime.v2.sdk.DependencyManager;
+import com.walmartlabs.concord.runtime.v2.sdk.TaskResult;
+import com.walmartlabs.concord.runtime.v2.sdk.Variables;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,26 +27,22 @@ public class Task implements com.walmartlabs.concord.runtime.v2.sdk.Task {
 
   private final Context context;
 
-  private final ApiClientFactory apiClientFactory;
+  private final ApiClient apiClient;
 
   private final Variables defaults;
 
   @Inject
-  public Task(
-      Context context, DependencyManager dependencyManager, ApiClientFactory apiClientFactory) {
+  public Task(Context context, DependencyManager dependencyManager, ApiClient apiClient) {
     this.defaults = context.defaultVariables();
     this.dependencyManager = dependencyManager;
     this.executor = Executors.newCachedThreadPool();
     this.context = context;
-    this.apiClientFactory = apiClientFactory;
+    this.apiClient = apiClient;
   }
 
   @Override
   public TaskResult execute(Variables input) throws Exception {
-    String baseURL = context.apiConfiguration().baseUrl();
     String sessionToken = context.processConfiguration().processInfo().sessionToken();
-    ApiClientConfiguration config =
-        ApiClientConfiguration.builder().baseUrl(baseURL).sessionToken(sessionToken).build();
     TaskCommon common =
         new TaskCommon(
             new TaskConfigImpl(context),
@@ -57,8 +53,8 @@ public class Task implements com.walmartlabs.concord.runtime.v2.sdk.Task {
             new SecretServiceImpl(context),
             new LockServiceImpl(context.lockService()),
             executor,
-            config,
-            apiClientFactory);
+            apiClient,
+            sessionToken);
     Map<String, Object> result = common.execute();
     return TaskResult.of(true).values(result);
   }

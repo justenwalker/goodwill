@@ -12,7 +12,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import com.walmartlabs.concord.ApiException;
+import com.walmartlabs.concord.client2.ApiException;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import java.io.PrintWriter;
