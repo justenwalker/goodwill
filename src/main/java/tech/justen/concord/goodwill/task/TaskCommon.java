@@ -6,9 +6,7 @@ package tech.justen.concord.goodwill.task;
 import static java.lang.String.format;
 import static tech.justen.concord.goodwill.DockerContainer.DEFAULT_WORK_DIR;
 
-import com.walmartlabs.concord.ApiClient;
-import com.walmartlabs.concord.client.ApiClientConfiguration;
-import com.walmartlabs.concord.client.ApiClientFactory;
+import com.walmartlabs.concord.client2.ApiClient;
 import io.grpc.Grpc;
 import io.grpc.Server;
 import io.grpc.TlsServerCredentials;
@@ -18,7 +16,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,9 +50,9 @@ public class TaskCommon {
 
   private final LockService lockService;
 
-  private final ApiClientConfiguration apiClientConfig;
+  private final ApiClient apiClient;
 
-  private final ApiClientFactory apiClientFactory;
+  private final String sessionToken;
 
   public TaskCommon(
       TaskConfig config,
@@ -62,8 +63,8 @@ public class TaskCommon {
       SecretService secretService,
       LockService lockService,
       ExecutorService executor,
-      ApiClientConfiguration apiClientConfig,
-      ApiClientFactory apiClientFactory) {
+      ApiClient apiClient,
+      String sessionToken) {
     this.config = config;
     this.params = params;
     this.dependencyManager = dependencyManager;
@@ -72,12 +73,8 @@ public class TaskCommon {
     this.dockerService = dockerService;
     this.secretService = secretService;
     this.executor = executor;
-    this.apiClientConfig = apiClientConfig;
-    this.apiClientFactory = apiClientFactory;
-  }
-
-  public ApiClient getSessionClient() {
-    return apiClientFactory.create(apiClientConfig);
+    this.apiClient = apiClient;
+    this.sessionToken = sessionToken;
   }
 
   public String compileInDocker() throws java.lang.Exception {
@@ -208,7 +205,6 @@ public class TaskCommon {
     ca.generatePKI(caFile, certFile, keyFile);
     Map<String, Object> taskResult = new HashMap<>();
     try {
-      ApiClient apiClient = apiClientFactory.create(apiClientConfig);
       int port = 0;
       long sleepMillis = 0;
       IOException startException = null;
@@ -219,7 +215,7 @@ public class TaskCommon {
           server =
               Grpc.newServerBuilderForPort(port, TlsServerCredentials.create(caCert, caKey))
                   .addService(new GrpcDockerService(dockerService))
-                  .addService(new GrpcConfigService(apiClientConfig, config))
+                  .addService(new GrpcConfigService(apiClient, config, sessionToken))
                   .addService(new GrpcContextService(contextService, taskResult))
                   .addService(new GrpcSecretService(config, secretService, apiClient))
                   .addService(new GrpcLockService(lockService))

@@ -3,8 +3,9 @@
 
 package tech.justen.concord.goodwill.task.v1;
 
-import com.walmartlabs.concord.client.SecretsApi;
-import com.walmartlabs.concord.sdk.*;
+import com.walmartlabs.concord.sdk.Context;
+import com.walmartlabs.concord.sdk.ContextUtils;
+import com.walmartlabs.concord.sdk.ProjectInfo;
 import java.util.Map;
 import tech.justen.concord.goodwill.SecretService;
 
@@ -14,13 +15,9 @@ public class SecretServiceImpl implements SecretService {
 
   private final Context ctx;
 
-  private final SecretsApi secretsApi;
-
-  public SecretServiceImpl(
-      Context ctx, com.walmartlabs.concord.sdk.SecretService secretService, SecretsApi secretsApi) {
+  public SecretServiceImpl(Context ctx, com.walmartlabs.concord.sdk.SecretService secretService) {
     this.ctx = ctx;
     this.secretService = secretService;
-    this.secretsApi = secretsApi;
   }
 
   @Override
