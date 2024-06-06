@@ -1,0 +1,34 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="com.walmartlabs.concord.runtime.v2.runner.logging.LogLevelFilter" />
+
+        <encoder class="com.walmartlabs.concord.runtime.v2.runner.logging.ConcordLogEncoder">
+            <layout class="com.walmartlabs.concord.runtime.v2.runner.logging.MaskingSensitiveDataLayout">
+                <!-- the UI expects log timestamps in a specific format to be able to convert it to the local time -->
+                <pattern>%date{yyyy-MM-dd'T'HH:mm:ss.SSSZ, UTC} [%-5level] %msg%n%rEx{full, com.sun, sun}</pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <appender name="PROCESS_STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="com.walmartlabs.concord.runtime.v2.runner.logging.LogLevelFilter" />
+
+        <encoder class="com.walmartlabs.concord.runtime.v2.runner.logging.ConcordLogEncoder">
+            <layout class="com.walmartlabs.concord.runtime.v2.runner.logging.MaskingSensitiveDataLayout">
+                <!-- the UI expects log timestamps in a specific format to be able to convert it to the local time -->
+                <pattern>%date{yyyy-MM-dd'T'HH:mm:ss.SSSZ, UTC} %msg%n</pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <logger name="processLog" level="TRACE" additivity="false">
+        <appender-ref ref="PROCESS_STDOUT"/>
+    </logger>
+
+    <logger name="com.walmartlabs.concord.plugins.log" level="TRACE"/>
+    <logger name="uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J" level="WARN"/>
+
+    <root level="TRACE">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

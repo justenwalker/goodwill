@@ -457,6 +457,7 @@ func (e E2E) TestPublished() error {
 			},
 			[]mage.ZipFile{
 				{Source: filepath.Join(testDir, "flow", "goodwill.tasks"), Dest: "goodwill.tasks"},
+				{Source: filepath.Join(testDir, "flow", "v1_logback.xml"), Dest: "v1_logback.xml"},
 			},
 		},
 		{
@@ -468,6 +469,7 @@ func (e E2E) TestPublished() error {
 			},
 			[]mage.ZipFile{
 				{Source: filepath.Join(testDir, "flow", "goodwill.tasks"), Dest: "goodwill.tasks"},
+				{Source: filepath.Join(testDir, "flow", "v2_logback.xml"), Dest: "v2_logback.xml"},
 			},
 		},
 	}
@@ -491,6 +493,7 @@ func (e E2E) Test() error {
 			},
 			[]mage.ZipFile{
 				{Source: jar, Dest: "lib/goodwill.jar"},
+				{Source: filepath.Join(testDir, "flow", "v1_logback.xml"), Dest: "v1_logback.xml"},
 				{Source: filepath.Join(testDir, "flow", "goodwill.go"), Dest: "goodwill.go"},
 				{Source: filepath.Join(testDir, "flow", "go.mod"), Dest: "go.mod"},
 				{Source: filepath.Join(testDir, "flow", "go.sum"), Dest: "go.sum"},
@@ -506,6 +509,7 @@ func (e E2E) Test() error {
 			},
 			[]mage.ZipFile{
 				{Source: jar, Dest: "lib/goodwill.jar"},
+				{Source: filepath.Join(testDir, "flow", "v2_logback.xml"), Dest: "v2_logback.xml"},
 				{Source: filepath.Join(testDir, "flow", "goodwill.go"), Dest: "goodwill.go"},
 				{Source: filepath.Join(testDir, "flow", "go.mod"), Dest: "go.mod"},
 				{Source: filepath.Join(testDir, "flow", "go.sum"), Dest: "go.sum"},
@@ -521,6 +525,7 @@ func (e E2E) Test() error {
 			},
 			[]mage.ZipFile{
 				{Source: jar, Dest: "lib/goodwill.jar"},
+				{Source: filepath.Join(testDir, "flow", "v1_logback.xml"), Dest: "v1_logback.xml"},
 				{Source: filepath.Join(testDir, "flow", "goodwill.tasks"), Dest: "goodwill.tasks"},
 			},
 		},
@@ -533,6 +538,7 @@ func (e E2E) Test() error {
 			},
 			[]mage.ZipFile{
 				{Source: jar, Dest: "lib/goodwill.jar"},
+				{Source: filepath.Join(testDir, "flow", "v2_logback.xml"), Dest: "v2_logback.xml"},
 				{Source: filepath.Join(testDir, "flow", "goodwill.tasks"), Dest: "goodwill.tasks"},
 			},
 		},
