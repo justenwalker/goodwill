@@ -6,8 +6,10 @@ configuration:
   requirements:
     jvm:
       extraArgs:
+{{- if .EnableDebug }}
         - "-Xdebug"
-        - "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006"
+        - "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:{{ .DebugPort }}"
+{{- end }}
         - "-Dlogback.configurationFile=v1_logback.xml"
 {{- if .Dependencies }}
 {{- if .Version }}

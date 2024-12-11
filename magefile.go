@@ -581,12 +581,12 @@ func waitE2ETest(ctx context.Context, processID string) error {
 
 func runE2ETests(tests []e2eTest) error {
 	var testerrors bool
+	debug.Println("===> API Key:", concordEnv().APIKey)
 	for _, test := range tests {
 		if _, err := runE2ETest(test.name, test.params, test.files); err != nil {
 			debug.Println("[ERROR]", test.name, err)
 		}
 	}
-	debug.Println("===> API Key:", concordEnv().APIKey)
 	if testerrors {
 		return fmt.Errorf("Error running tests")
 	}
