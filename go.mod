@@ -2,7 +2,7 @@ module go.justen.tech/goodwill
 
 go 1.18
 
-toolchain go1.22.3
+toolchain go1.23.4
 
 require (
 	github.com/dave/jennifer v1.7.0
