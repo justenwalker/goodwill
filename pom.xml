@@ -43,7 +43,7 @@
     <properties>
         <concord.version>2.14.2</concord.version>
         <protobuf.version>3.25.5</protobuf.version>
-        <grpc.version>1.68.0</grpc.version>
+        <grpc.version>1.69.0</grpc.version>
         <apache.commons-compress.version>1.27.1</apache.commons-compress.version>
         <guava.version>33.2.1-jre</guava.version>
         <junit.version>4.13.2</junit.version>
