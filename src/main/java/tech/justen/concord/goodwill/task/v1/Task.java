@@ -5,11 +5,10 @@ package tech.justen.concord.goodwill.task.v1;
 
 import static tech.justen.concord.goodwill.task.TaskParams.*;
 
-import com.walmartlabs.concord.client.ApiClientConfiguration;
-import com.walmartlabs.concord.client.ApiClientFactory;
-import com.walmartlabs.concord.client.SecretsApi;
+import com.walmartlabs.concord.client2.ApiClient;
+import com.walmartlabs.concord.client2.ApiClientFactory;
+import com.walmartlabs.concord.client2.ImmutableApiClientConfiguration;
 import com.walmartlabs.concord.sdk.*;
-import com.walmartlabs.concord.sdk.DockerService;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -32,9 +31,9 @@ public class Task implements com.walmartlabs.concord.sdk.Task {
 
   private final DockerService dockerService;
 
-  private final ApiConfiguration apiConfiguration;
-
   private final ApiClientFactory apiClientFactory;
+
+  private final ApiConfiguration apiConfiguration;
 
   private Map<String, Object> defaults;
 
@@ -44,15 +43,15 @@ public class Task implements com.walmartlabs.concord.sdk.Task {
       DockerService dockerService,
       SecretService secretService,
       LockService lockService,
-      ApiConfiguration apiConfiguration,
-      ApiClientFactory apiClientFactory) {
+      ApiClientFactory apiClientFactory,
+      ApiConfiguration apiConfiguration) {
     this.dockerService = dockerService;
     this.dependencyManager = dependencyManager;
     this.secretService = secretService;
     this.lockService = lockService;
     this.executor = Executors.newCachedThreadPool();
-    this.apiConfiguration = apiConfiguration;
     this.apiClientFactory = apiClientFactory;
+    this.apiConfiguration = apiConfiguration;
   }
 
   @Override
@@ -61,11 +60,13 @@ public class Task implements com.walmartlabs.concord.sdk.Task {
     if (defaults == null) {
       defaults = Collections.emptyMap();
     }
-    String baseURL = apiConfiguration.getBaseUrl();
     String sessionToken = ContextUtils.getSessionToken(ctx);
-    ApiClientConfiguration config =
-        ApiClientConfiguration.builder().baseUrl(baseURL).sessionToken(sessionToken).build();
-    SecretsApi secretsApi = new SecretsApi(apiClientFactory.create(config));
+    ApiClient apiClient =
+        apiClientFactory.create(
+            ImmutableApiClientConfiguration.builder()
+                .baseUrl(apiConfiguration.getBaseUrl())
+                .sessionToken(sessionToken)
+                .build());
     TaskCommon common =
         new TaskCommon(
             new TaskConfigImpl(ctx),
@@ -73,11 +74,11 @@ public class Task implements com.walmartlabs.concord.sdk.Task {
             new DependencyManagerImpl(dependencyManager),
             new ContextServiceImpl(ctx),
             new DockerImpl(ctx, dockerService),
-            new SecretServiceImpl(ctx, secretService, secretsApi),
+            new SecretServiceImpl(ctx, secretService),
             new LockServiceImpl(ctx, lockService),
             executor,
-            config,
-            apiClientFactory);
+            apiClient,
+            sessionToken);
     Map<String, Object> result = common.execute();
     for (Map.Entry<String, Object> e : result.entrySet()) {
       ctx.setVariable(e.getKey(), e.getValue());

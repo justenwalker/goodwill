@@ -22,6 +22,8 @@ const DefaultGoVersion = "1.22"
 
 type ConcordParams struct {
 	Dependencies bool
+	EnableDebug  bool
+	DebugPort    int
 	Runtime      ConcordRuntime
 	Version      string
 	GoVersion    string

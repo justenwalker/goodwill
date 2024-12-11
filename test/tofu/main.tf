@@ -145,6 +145,10 @@ resource "docker_container" "concord-server" {
     internal = 8001
     external = 8001
   }
+  ports {
+    internal = 5005
+    external = 5004
+  }
   volumes {
     host_path      = local_file.concord-server-config.filename
     container_path = "/concord.conf"
@@ -157,7 +161,8 @@ resource "docker_container" "concord-server" {
   }
   env = [
     "CONCORD_CFG_FILE=/concord.conf",
-    "CONCORD_MAVEN_CFG=/maven.json"
+    "CONCORD_MAVEN_CFG=/maven.json",
+    "CONCORD_JAVA_OPTS=-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005",
   ]
   networks_advanced {
     name = docker_network.net.name
@@ -179,6 +184,14 @@ resource "docker_image" "concord-agent" {
 resource "docker_container" "concord-agent" {
   name  = "concord-agent"
   image = docker_image.concord-agent.image_id
+  ports {
+    internal = 5005
+    external = 5005
+  }
+  ports {
+    internal = 5006
+    external = 5006
+  }
   volumes {
     host_path      = local_file.concord-agent-config.filename
     container_path = "/concord.conf"
@@ -198,6 +211,7 @@ resource "docker_container" "concord-agent" {
     "CONCORD_CFG_FILE=/concord.conf",
     "CONCORD_MAVEN_CFG=/maven.json",
     "CONCORD_DOCKER_LOCAL_MODE=false",
+    "CONCORD_JAVA_OPTS=-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005",
     "GOPRIVATE=${var.goprivate}",
     "GOPROXY=${var.goproxy}",
     "GONOPROXY=${var.gonoproxy}",

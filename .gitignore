@@ -13,3 +13,7 @@ terraform.tfvars
 
 # POM
 pom.xml.versionsBackup
+
+# IntelliJ
+*.iml
+/.idea/
