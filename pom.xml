@@ -41,7 +41,7 @@
     </scm>
 
     <properties>
-        <concord.version>2.14.2</concord.version>
+        <concord.version>2.20.0</concord.version>
         <protobuf.version>3.25.5</protobuf.version>
         <grpc.version>1.69.0</grpc.version>
         <apache.commons-compress.version>1.27.1</apache.commons-compress.version>
